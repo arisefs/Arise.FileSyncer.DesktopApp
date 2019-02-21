@@ -1,0 +1,71 @@
+.profiles-page-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-gap: 8px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.profiles-page-item {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow: hidden;
+
+    padding: 16px;
+    height: 100px;
+
+    border: 1px solid #A0A0A0;
+    background-color: #F0F0F0;
+    
+    transition: background-color 0.15s;
+}
+
+.profiles-page-item:hover {
+    background-color: #F8F8F8;
+}
+
+.profiles-page-item:hover:active {
+    background-color: #E0E0E0;
+}
+
+.profiles-page-icon-item {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+}
+
+.profiles-page-new-icon {
+    fill: rgba(0, 0, 0, 0.33);
+    stroke-width: 0;
+}
+
+@media only screen and (min-width: 700px) {
+    .profiles-page-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media only screen and (min-width: 1400px) {
+    .profiles-page-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+@media only screen and (min-width: 2100px) {
+    .profiles-page-grid {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+}
+
+.ppi-name {
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 4px;
+}
+
+.ppi-item {
+    font-size: 14px;
+    font-weight: 300;
+}

@@ -1,0 +1,203 @@
+import React from "react";
+import AppData from "../../app-data/app-data";
+import SharedDictionary from "../../../shared/shared-dictionary";
+import { HeaderButton } from "./header-button";
+import { Disposable } from "../../../shared/typed-event";
+import { Connection, Progress } from "../../app-data/interfaces";
+import { Sidebar } from "./sidebar/sidebar";
+import { SettingsPage } from "../pages/settings";
+import { goBack, changePage } from "../page-controller";
+import { ProgressBar } from "../../components/progressbar";
+import { formatNumber, getPercent, getRemaining, getStep } from "../../app-data/extensions";
+
+require("./header.css");
+
+interface HeaderProps {
+    displayName: string,
+    showBackButton: boolean,
+}
+
+interface HeaderState {
+    connectionCount: number,
+    sidebar: SidebarData,
+    progress: ProgressBarState,
+}
+
+interface ProgressBarState {
+    show: boolean,
+    percent: number,
+    remaining: number,
+    step: number,
+}
+
+export class Header extends React.Component<HeaderProps, HeaderState> {
+    private connectionsEvent: Disposable;
+    private progressEvent: Disposable;
+
+    constructor(props: any) {
+        super(props);
+
+        this.state = {
+            connectionCount: 0,
+            sidebar: sidebarClosed,
+            progress: {
+                show: false,
+                percent: undefined,
+                remaining: 0,
+                step: undefined,
+            },
+        };
+
+        this.onBackClicked = this.onBackClicked.bind(this);
+        this.onSyncingClicked = this.onSyncingClicked.bind(this);
+        this.onSettingsClicked = this.onSettingsClicked.bind(this);
+        this.updateConnectionCount = this.updateConnectionCount.bind(this);
+        this.closeSidebar = this.closeSidebar.bind(this);
+        this.progressUpdate = this.progressUpdate.bind(this);
+    }
+
+    public componentDidMount() {
+        this.connectionsEvent = AppData.connections.on(this.updateConnectionCount);
+        this.updateConnectionCount(AppData.connections);
+
+        this.progressEvent = AppData.globalProgress.setup(this.progressUpdate);
+    }
+
+    public componentWillUnmount() {
+        this.connectionsEvent.dispose();
+        this.progressEvent.dispose();
+    }
+
+    public render() {
+        let pbLeftLabel = "- KB/s | - seconds remaining";
+        let pbRightLabel = formatNumber(this.state.progress.remaining) + " KB";
+
+        if (this.state.progress.step != undefined) {
+            pbLeftLabel = formatNumber(this.state.progress.step) + " KB/s | ";
+            if (this.state.progress.step != 0) {
+                let remainingTime = this.state.progress.remaining / this.state.progress.step;
+                pbLeftLabel += formatNumber(remainingTime) + " seconds remaining";
+            } else {
+                pbLeftLabel += "- seconds remaining";
+            }
+        }
+
+        return (
+            <div className="main-header">
+                <HeaderButton
+                    extraClasses={this.showBack() ? "main-header-back" : "main-header-back main-header-back-hide"}
+                    svgPath="resources/sharp-arrow_back-24px.svg"
+                    onClick={this.onBackClicked} />
+                <div className="main-header-left">
+                    <div className="main-header-display-name">
+                        {this.props.displayName}
+                    </div>
+                    <div className="main-header-connection-count">
+                        {this.state.connectionCount + " Connection"}
+                    </div>
+                </div>
+                <div className="main-header-middle">
+                    {this.state.progress.show &&
+                        <ProgressBar progress={this.state.progress.percent} leftLabel={pbLeftLabel} rightLabel={pbRightLabel} />
+                    }
+                </div>
+                <HeaderButton
+                    extraClasses="main-header-syncing"
+                    svgPath={this.state.sidebar.buttonIcon}
+                    onClick={this.onSyncingClicked} />
+                <HeaderButton
+                    extraClasses="main-header-settings"
+                    svgPath="resources/sharp-settings-24px.svg"
+                    onClick={this.onSettingsClicked} />
+                <div className={this.state.sidebar.blockerClass} onClick={this.closeSidebar} />
+                <div className={this.state.sidebar.sidebarClass}>
+                    <Sidebar />
+                </div>
+            </div>
+        );
+    }
+
+    private progressUpdate(currentProgress: Progress) {
+        let lastProgress = AppData.lastGlobalProgress.get();
+
+        let progress: ProgressBarState = {
+            show: false,
+            percent: undefined,
+            remaining: 0,
+            step: undefined,
+        };
+
+        if (!currentProgress.indeterminate) {
+            progress.percent = getPercent(currentProgress);
+            progress.remaining = getRemaining(currentProgress);
+            progress.step = getStep(currentProgress, lastProgress);
+
+            if (progress.percent != 1) {
+                progress.show = true;
+            }
+        }
+
+        this.setState({ progress: progress });
+    }
+
+    private onBackClicked(_event: any) {
+        if (!(this.props.showBackButton || this.state.sidebar.isOpen)) {
+            return;
+        }
+
+        if (this.state.sidebar.isOpen) {
+            this.closeSidebar();
+        } else {
+            goBack();
+        }
+    }
+
+    private onSyncingClicked(_event: any) {
+        if (this.state.sidebar.isOpen) {
+            this.closeSidebar();
+        } else {
+            this.openSidebar();
+        }
+    }
+
+    private onSettingsClicked(_event: any) {
+        changePage({ page: SettingsPage, props: {} });
+    }
+
+    private showBack() {
+        return (this.props.showBackButton || this.state.sidebar.isOpen);
+    }
+
+    private openSidebar() {
+        this.setState({ sidebar: sidebarOpen });
+    }
+
+    private closeSidebar() {
+        this.setState({ sidebar: sidebarClosed });
+    }
+
+    private updateConnectionCount(sd: SharedDictionary<Connection>) {
+        this.setState({ connectionCount: sd.count() });
+    }
+}
+
+interface SidebarData {
+    isOpen: boolean,
+    sidebarClass: string,
+    blockerClass: string,
+    buttonIcon: string,
+}
+
+const sidebarOpen: SidebarData = {
+    isOpen: true,
+    sidebarClass: "main-header-sidebar main-header-sidebar-show",
+    blockerClass: "main-header-sidebar-blocker main-header-sidebar-blocker-show",
+    buttonIcon: "resources/sharp-chevron_right-24px.svg"
+}
+
+const sidebarClosed: SidebarData = {
+    isOpen: false,
+    sidebarClass: "main-header-sidebar",
+    blockerClass: "main-header-sidebar-blocker",
+    buttonIcon: "resources/sharp-sync-24px.svg"
+}

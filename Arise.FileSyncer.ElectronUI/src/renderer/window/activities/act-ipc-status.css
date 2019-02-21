@@ -1,0 +1,9 @@
+.act-ipc-status {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    -webkit-user-select: none;
+    cursor: default;
+}
