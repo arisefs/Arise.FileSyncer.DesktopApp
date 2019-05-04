@@ -1,6 +1,6 @@
 {
-    "name": "arise-filesyncer-ui",
-    "productName": "Arise File Syncer",
+    "name": "arise-filesyncer-manager",
+    "productName": "Arise File Syncer Manager",
     "version": "1.0.0",
     "main": "main/main.js"
 }

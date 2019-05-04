@@ -265,7 +265,6 @@ node_modules/
 
 # Node package builds
 dist/
-packages/
 
 # Disable package-lock
 package-lock.json
