@@ -268,3 +268,6 @@ dist/
 
 # Disable package-lock
 package-lock.json
+
+# Final packages
+/Packages
