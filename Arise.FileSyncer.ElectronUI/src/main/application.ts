@@ -54,7 +54,7 @@ class Application {
             frame: false,
             width: 900,
             height: 600,
-            title: "Arise File Syncer",
+            title: "Arise File Syncer - Manager",
             minWidth: 500,
             minHeight: 300,
         });
