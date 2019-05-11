@@ -10,7 +10,7 @@ interface ConnectionListState {
 interface ConnectionState {
     key: string,
     name: string,
-    progress: Interfaces.ProgressWithSpeed,
+    progress: Interfaces.Progress,
 }
 
 export class ConnectionList extends React.Component<any, ConnectionListState> {

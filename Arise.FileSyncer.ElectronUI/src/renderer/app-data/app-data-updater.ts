@@ -55,9 +55,6 @@ function onConnectionRemoved(_e: any, message: ConnectionRemoved.Message) {
 }
 
 function onUpdate(_e: any, message: Update.Message) {
-    AppData.lastGlobalProgress.set(AppData.globalProgress.get());
-    AppData.globalProgress.set(message.GlobalProgress);
-
     for (let progress of message.Progresses) {
         if (AppData.connections.containsKey(progress.id)) {
             let connection = AppData.connections.get(progress.id);

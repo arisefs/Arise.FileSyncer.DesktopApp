@@ -33,14 +33,22 @@ export function getPercent(progress: Progress) {
 }
 
 export function getRemaining(progress: Progress) {
-    return (progress.maximum - progress.current) / 1000;
+    return progress.maximum - progress.current;
 }
 
-export function getStep(progress: Progress, lastProgress: Progress) {
-    if (progress.indeterminate || lastProgress.indeterminate) {
+export function getSpeed(progress: Progress) {
+    if (progress.indeterminate) {
         return undefined;
     } else {
-        return (progress.current - lastProgress.current) / 1000;
+        return progress.speed;
+    }
+}
+
+export function getRemainingTime(progress: Progress) {
+    if (progress.indeterminate || progress.speed == 0) {
+        return undefined;
+    } else {
+        return getRemaining(progress) / progress.speed;
     }
 }
 
@@ -57,19 +65,32 @@ export function formatNumber(num: number) {
 }
 
 export function formatSizeNumber(num: number) {
-    let divNum = num;
-    let divLevel = 0;
-    while ((divNum / 1000) >= 1.0) {
-        divNum = divNum / 1000;
-        divLevel++;
-    }
-
-    let text = divNum.toFixed(1);
-    text += " " + levelToUnit(divLevel)
+    let div = divideCounter(num, 1000);
+    let text = div.num.toFixed(1);
+    text += " " + levelToSizeUnit(div.level);
     return text;
 }
 
-function levelToUnit(level: number) {
+export function formatTimeNumber(num: number) {
+    let div = divideCounter(num, 60);
+    let text = div.num.toFixed(0);
+    text += " " + levelToTimeUnit(div.level);
+    return text;
+}
+
+function divideCounter(num: number, divider: number) {
+    let divNum = num;
+    let divLevel = 0;
+
+    while ((divNum / divider) >= 1.0) {
+        divNum = divNum / divider;
+        divLevel++;
+    }
+
+    return { num: divNum, level: divLevel };
+}
+
+function levelToSizeUnit(level: number) {
     switch (level) {
         case 0: return "B"
         case 1: return "KB"
@@ -77,6 +98,14 @@ function levelToUnit(level: number) {
         case 3: return "GB"
         case 4: return "TB"
         default: return "PB"
+    }
+}
+
+function levelToTimeUnit(level: number) {
+    switch (level) {
+        case 0: return "seconds"
+        case 1: return "minutes"
+        default: return "hours"
     }
 }
 

@@ -8,7 +8,7 @@ import { Sidebar } from "./sidebar/sidebar";
 import { SettingsPage } from "../pages/settings";
 import { goBack, changePage } from "../page-controller";
 import { ProgressBar } from "../../components/progressbar";
-import { formatNumber, getPercent, getRemaining, getStep, formatSizeNumber } from "../../app-data/extensions";
+import { getPercent, getRemaining, getSpeed, formatSizeNumber, formatTimeNumber } from "../../app-data/extensions";
 
 require("./header.css");
 
@@ -27,12 +27,11 @@ interface ProgressBarState {
     show: boolean,
     percent: number,
     remaining: number,
-    step: number,
+    speed: number,
 }
 
 export class Header extends React.Component<HeaderProps, HeaderState> {
     private connectionsEvent: Disposable;
-    private progressEvent: Disposable;
 
     constructor(props: any) {
         super(props);
@@ -44,43 +43,41 @@ export class Header extends React.Component<HeaderProps, HeaderState> {
                 show: false,
                 percent: undefined,
                 remaining: 0,
-                step: undefined,
+                speed: undefined,
             },
         };
 
         this.onBackClicked = this.onBackClicked.bind(this);
         this.onSyncingClicked = this.onSyncingClicked.bind(this);
         this.onSettingsClicked = this.onSettingsClicked.bind(this);
-        this.updateConnectionCount = this.updateConnectionCount.bind(this);
+        this.updateConnectionData = this.updateConnectionData.bind(this);
         this.closeSidebar = this.closeSidebar.bind(this);
-        this.progressUpdate = this.progressUpdate.bind(this);
     }
 
     public componentDidMount() {
-        this.connectionsEvent = AppData.connections.on(this.updateConnectionCount);
-        this.updateConnectionCount(AppData.connections);
-
-        this.progressEvent = AppData.globalProgress.setup(this.progressUpdate);
+        this.connectionsEvent = AppData.connections.on(this.updateConnectionData);
+        this.updateConnectionData(AppData.connections);
     }
 
     public componentWillUnmount() {
         this.connectionsEvent.dispose();
-        this.progressEvent.dispose();
     }
 
     public render() {
-        let pbLeftLabel = "- KB/s | - seconds remaining";
-        let pbRightLabel = formatNumber(this.state.progress.remaining) + " KB";
+        let pbLeftLabel = "- KB/s | ";
+        let pbRightLabel = "- seconds remaining";
 
-        if (this.state.progress.step != undefined) {
-            pbLeftLabel = formatSizeNumber(this.state.progress.step) + "/s | ";
-            if (this.state.progress.step != 0) {
-                let remainingTime = this.state.progress.remaining / this.state.progress.step;
-                pbLeftLabel += formatNumber(remainingTime) + " seconds remaining";
+        if (this.state.progress.speed != undefined) {
+            pbLeftLabel = formatSizeNumber(this.state.progress.speed) + "/s | ";
+            if (this.state.progress.speed != 0) {
+                let remainingTime = this.state.progress.remaining / this.state.progress.speed;
+                pbRightLabel = formatTimeNumber(remainingTime) + " remaining";
             } else {
-                pbLeftLabel += "- seconds remaining";
+                pbRightLabel = "- seconds remaining";
             }
         }
+
+        pbLeftLabel += formatSizeNumber(this.state.progress.remaining) + " left";
 
         return (
             <div className="main-header">
@@ -117,20 +114,49 @@ export class Header extends React.Component<HeaderProps, HeaderState> {
         );
     }
 
-    private progressUpdate(currentProgress: Progress) {
-        let lastProgress = AppData.lastGlobalProgress.get();
+    private updateConnectionData(sd: SharedDictionary<Connection>) {
+        this.setState({ connectionCount: sd.count() });
 
+        let keys = sd.keys();
+        let values = sd.values();
+        let progress: Progress = {
+            indeterminate: true,
+            current: 0,
+            maximum: 0,
+            speed: 0,
+        };
+
+        let added = 0;
+        for (let i = 0; i < keys.length; i++) {
+            let conProgress = values[i].progress;
+            if (conProgress && !conProgress.indeterminate) {
+                progress.indeterminate = false;
+                progress.current += conProgress.current;
+                progress.maximum += conProgress.maximum;
+                progress.speed += conProgress.speed;
+                added++;
+            }
+        }
+
+        if (added != 0) {
+            progress.speed /= added;
+        }
+
+        this.progressUpdate(progress);
+    }
+
+    private progressUpdate(currentProgress: Progress) {
         let progress: ProgressBarState = {
             show: false,
             percent: undefined,
             remaining: 0,
-            step: undefined,
+            speed: undefined,
         };
 
         if (!currentProgress.indeterminate) {
             progress.percent = getPercent(currentProgress);
             progress.remaining = getRemaining(currentProgress);
-            progress.step = getStep(currentProgress, lastProgress);
+            progress.speed = getSpeed(currentProgress);
 
             if (progress.percent != 1) {
                 progress.show = true;
@@ -174,10 +200,6 @@ export class Header extends React.Component<HeaderProps, HeaderState> {
 
     private closeSidebar() {
         this.setState({ sidebar: sidebarClosed });
-    }
-
-    private updateConnectionCount(sd: SharedDictionary<Connection>) {
-        this.setState({ connectionCount: sd.count() });
     }
 }
 
