@@ -1,7 +1,7 @@
 import React from "react";
 import { ProgressBar } from "../../../components/progressbar";
 import { Interfaces } from "../../../app-data/app-data";
-import { getPercent, getRemaining, formatNumber } from "../../../app-data/extensions";
+import { getPercent, getRemaining, formatNumber, formatSizeNumber } from "../../../app-data/extensions";
 
 require("./connection-item.css");
 
@@ -25,7 +25,7 @@ export class ConnectionItem extends React.Component<ConnectionItemProps, any> {
             let remainingNum = getRemaining(this.props.progress);
             if (remainingNum != null) {
                 remaining = formatNumber(remainingNum) + " KB";
-                speed = this.props.progress.speed / 1000 + " KB/s"
+                speed = formatSizeNumber(this.props.progress.speed) + "/s"
             }
         }
 

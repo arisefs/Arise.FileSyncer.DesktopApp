@@ -31,7 +31,7 @@ namespace Arise.FileSyncer.Service
             Peer = new SyncerPeer(Config.PeerSettings);
             Listener = new NetworkListener(Config, Peer.AddConnection);
             Discovery = new NetworkDiscovery(Config, Peer, Listener);
-            ProgressTracker = new ProgressTracker(Peer);
+            ProgressTracker = new ProgressTracker(Peer, 500);
 
             // Subscribe to save events
             Peer.NewPairAdded += (s, e) => Config.Save();

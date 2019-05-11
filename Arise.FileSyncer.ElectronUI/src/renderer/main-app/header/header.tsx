@@ -8,7 +8,7 @@ import { Sidebar } from "./sidebar/sidebar";
 import { SettingsPage } from "../pages/settings";
 import { goBack, changePage } from "../page-controller";
 import { ProgressBar } from "../../components/progressbar";
-import { formatNumber, getPercent, getRemaining, getStep } from "../../app-data/extensions";
+import { formatNumber, getPercent, getRemaining, getStep, formatSizeNumber } from "../../app-data/extensions";
 
 require("./header.css");
 
@@ -73,7 +73,7 @@ export class Header extends React.Component<HeaderProps, HeaderState> {
         let pbRightLabel = formatNumber(this.state.progress.remaining) + " KB";
 
         if (this.state.progress.step != undefined) {
-            pbLeftLabel = formatNumber(this.state.progress.step) + " KB/s | ";
+            pbLeftLabel = formatSizeNumber(this.state.progress.step) + "/s | ";
             if (this.state.progress.step != 0) {
                 let remainingTime = this.state.progress.remaining / this.state.progress.step;
                 pbLeftLabel += formatNumber(remainingTime) + " seconds remaining";

@@ -55,3 +55,28 @@ export function formatNumber(num: number) {
 
     return outText;
 }
+
+export function formatSizeNumber(num: number) {
+    let divNum = num;
+    let divLevel = 0;
+    while ((divNum / 1000) >= 1.0) {
+        divNum = divNum / 1000;
+        divLevel++;
+    }
+
+    let text = divNum.toFixed(1);
+    text += " " + levelToUnit(divLevel)
+    return text;
+}
+
+function levelToUnit(level: number) {
+    switch (level) {
+        case 0: return "B"
+        case 1: return "KB"
+        case 2: return "MB"
+        case 3: return "GB"
+        case 4: return "TB"
+        default: return "PB"
+    }
+}
+
