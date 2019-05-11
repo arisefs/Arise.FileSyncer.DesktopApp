@@ -7,7 +7,7 @@ require("./connection-item.css");
 
 interface ConnectionItemProps {
     name: string,
-    progress: Interfaces.Progress,
+    progress: Interfaces.ProgressWithSpeed,
 }
 
 export class ConnectionItem extends React.Component<ConnectionItemProps, any> {
@@ -18,19 +18,21 @@ export class ConnectionItem extends React.Component<ConnectionItemProps, any> {
     public render() {
         let percent;
         let remaining;
+        let speed;
 
         if (!this.props.progress.indeterminate) {
             percent = getPercent(this.props.progress);
             let remainingNum = getRemaining(this.props.progress);
             if (remainingNum != null) {
                 remaining = formatNumber(remainingNum) + " KB";
+                speed = this.props.progress.speed / 1000 + " KB/s"
             }
         }
 
         return (
             <div className="connection-item-container">
                 <div>{this.props.name}</div>
-                <ProgressBar progress={percent} rightLabel={remaining} />
+                <ProgressBar progress={percent} rightLabel={remaining} leftLabel={speed} />
             </div>
         );
     }

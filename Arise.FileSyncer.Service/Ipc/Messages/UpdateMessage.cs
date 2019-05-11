@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Arise.FileSyncer.Common;
 using Arise.FileSyncer.Core;
 
 namespace Arise.FileSyncer.Service.Ipc.Messages
@@ -12,12 +13,12 @@ namespace Arise.FileSyncer.Service.Ipc.Messages
         public Progress GlobalProgress { get; set; }
         public List<ConnectionProgress> Progresses { get; set; }
 
-        internal IpcMessage Fill(IpcController ipc)
+        internal IpcMessage Fill(IpcController ipc, ProgressUpdateEventArgs e)
         {
             IsSyncing = ipc.Service.Peer.IsSyncing();
             GlobalProgress = ipc.Service.Peer.GetGlobalProgress();
             Progresses = new List<ConnectionProgress>();
-
+            /*
             SyncerPeer peer = ipc.Service.Peer;
             foreach (Guid id in peer.GetConnectionIds())
             {
@@ -25,6 +26,11 @@ namespace Arise.FileSyncer.Service.Ipc.Messages
                 {
                     Progresses.Add(new ConnectionProgress(id, connection.Progress));
                 }
+            }
+            */
+            foreach (var p in e.Progresses)
+            {
+                Progresses.Add(new ConnectionProgress(p.Key, p.Value.Progress, p.Value.Speed));
             }
 
             return this;
@@ -55,13 +61,15 @@ namespace Arise.FileSyncer.Service.Ipc.Messages
             public bool indeterminate;
             public long current;
             public long maximum;
+            public double speed;
 
-            public ConnectionProgress(Guid id, ProgressCounter progress)
+            public ConnectionProgress(Guid id, ISyncProgress progress, double speed)
             {
                 this.id = id;
                 indeterminate = progress.Indeterminate;
                 current = progress.Current;
                 maximum = progress.Maximum;
+                this.speed = speed;
             }
         }
     }

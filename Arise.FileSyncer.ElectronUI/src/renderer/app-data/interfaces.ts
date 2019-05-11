@@ -13,13 +13,17 @@ export interface Profile {
 export interface Connection {
     verified: boolean,
     displayName: string,
-    progress: Progress,
+    progress: ProgressWithSpeed,
 }
 
 export interface Progress {
     indeterminate: boolean,
     current: number,
     maximum: number,
+}
+
+export interface ProgressWithSpeed extends Progress {
+    speed: number,
 }
 
 export interface PageStack {

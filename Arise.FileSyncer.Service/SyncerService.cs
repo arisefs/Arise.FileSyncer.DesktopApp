@@ -11,6 +11,7 @@ namespace Arise.FileSyncer.Service
         public NetworkListener Listener { get; private set; }
         public SyncerConfig Config { get; private set; }
         public SyncerPeer Peer { get; private set; }
+        public ProgressTracker ProgressTracker { get; private set; }
 
         private DiscoveryTimer discoveryTimer;
         private IpcController ipcController;
@@ -30,6 +31,7 @@ namespace Arise.FileSyncer.Service
             Peer = new SyncerPeer(Config.PeerSettings);
             Listener = new NetworkListener(Config, Peer.AddConnection);
             Discovery = new NetworkDiscovery(Config, Peer, Listener);
+            ProgressTracker = new ProgressTracker(Peer);
 
             // Subscribe to save events
             Peer.NewPairAdded += (s, e) => Config.Save();
@@ -75,6 +77,7 @@ namespace Arise.FileSyncer.Service
                 {
                     Stop();
 
+                    ProgressTracker?.Dispose();
                     discoveryTimer?.Dispose();
                     ipcController?.Dispose();
                     Peer?.Dispose();

@@ -47,6 +47,8 @@ namespace Arise.FileSyncer.Service.Ipc
             Task.Factory.StartNew(Receiver, TaskCreationOptions.LongRunning);
             Task.Factory.StartNew(Sender, TaskCreationOptions.LongRunning);
 
+            Service.ProgressTracker.ProgressUpdate += ProgressTracker_ProgressUpdate;
+
             Service.Peer.ConnectionAdded += (s, e) => Send(new ConnectionAddedMessage().Fill(e));
             Service.Peer.ConnectionVerified += (s, e) => Send(new ConnectionVerifiedMessage().Fill(e));
             Service.Peer.ConnectionRemoved += (s, e) => Send(new ConnectionRemovedMessage().Fill(e));
@@ -77,8 +79,13 @@ namespace Arise.FileSyncer.Service.Ipc
 
         private void UpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if (ipcSender.IsConnected) Send(new UpdateMessage().Fill(this));
+            if (ipcSender.IsConnected) { } //Send(new UpdateMessage().Fill(this));
             else updateTimer.Stop();
+        }
+
+        private void ProgressTracker_ProgressUpdate(object sender, ProgressUpdateEventArgs e)
+        {
+            if (ipcSender.IsConnected) Send(new UpdateMessage().Fill(this, e));
         }
 
         private void OnMessageReceived(IpcMessage message)

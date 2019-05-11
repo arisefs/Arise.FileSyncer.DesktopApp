@@ -32,6 +32,7 @@ function onConnectionAdded(_e: any, message: ConnectionAdded.Message) {
             indeterminate: true,
             current: 0,
             maximum: 0,
+            speed: 0,
         }
     });
 }
