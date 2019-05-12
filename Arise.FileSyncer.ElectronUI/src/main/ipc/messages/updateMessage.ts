@@ -8,6 +8,10 @@ export interface Message extends IpcMessage {
     Progresses: ConnectionProgress[],
 }
 
-export interface ConnectionProgress extends Progress {
-    id: string,
+export interface ConnectionProgress {
+    Id: string,
+    Indeterminate: boolean,
+    Current: number,
+    Maximum: number,
+    Speed: number,
 }

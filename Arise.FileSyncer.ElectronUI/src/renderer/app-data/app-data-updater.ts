@@ -56,10 +56,15 @@ function onConnectionRemoved(_e: any, message: ConnectionRemoved.Message) {
 
 function onUpdate(_e: any, message: Update.Message) {
     for (let progress of message.Progresses) {
-        if (AppData.connections.containsKey(progress.id)) {
-            let connection = AppData.connections.get(progress.id);
-            connection.progress = progress;
-            AppData.connections.set(progress.id, connection);
+        if (AppData.connections.containsKey(progress.Id)) {
+            let connection = AppData.connections.get(progress.Id);
+            connection.progress = {
+                indeterminate: progress.Indeterminate,
+                current: progress.Current,
+                maximum: progress.Maximum,
+                speed: progress.Speed,
+            };
+            AppData.connections.set(progress.Id, connection);
         }
     }
 }
