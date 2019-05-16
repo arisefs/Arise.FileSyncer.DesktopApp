@@ -61,7 +61,7 @@ namespace Arise.FileSyncer.Service
         {
             if (!Config.Load())
             {
-                Config.PeerSettings = new SyncerPeerSettings(Guid.NewGuid(), $"{Environment.MachineName}:{Environment.UserName}");
+                Config.Reset(new SyncerPeerSettings(Guid.NewGuid(), $"{Environment.MachineName}:{Environment.UserName}"));
                 Config.Save();
             }
         }
