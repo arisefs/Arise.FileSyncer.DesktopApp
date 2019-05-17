@@ -23,9 +23,13 @@ namespace Arise.FileSyncer.Service
             catch (Exception ex)
             {
                 Log.Error(ex.Message);
+#if DEBUG
+                throw;
+#else
                 return;
+#endif
             }
-            
+
             Thread.Sleep(Timeout.Infinite);
         }
     }
