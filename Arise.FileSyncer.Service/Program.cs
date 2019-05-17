@@ -15,7 +15,17 @@ namespace Arise.FileSyncer.Service
             Log.Debug = (msg) => { Console.WriteLine($"D: {msg}"); };
 
             var syncerService = new SyncerService();
-            syncerService.Run();
+
+            try
+            {
+                syncerService.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.Message);
+                return;
+            }
+            
             Thread.Sleep(Timeout.Infinite);
         }
     }

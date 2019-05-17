@@ -42,8 +42,16 @@ namespace Arise.FileSyncer.Service
             // Create a discovery periodic check
             discoveryTimer = new DiscoveryTimer(Discovery);
 
-            // Create IPC server for UI app
-            ipcController = new IpcController(this);
+            try
+            {
+                // Create IPC server for UI app
+                ipcController = new IpcController(this);
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Failed to create IPC! Already running? Ex: " + ex.Message);
+                throw;
+            }
 
             // Write out a simple message
             Log.Info("Arise FileSyncer Started");
