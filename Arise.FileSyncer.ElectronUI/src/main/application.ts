@@ -57,6 +57,9 @@ class Application {
             title: "Arise File Syncer - Manager",
             minWidth: 500,
             minHeight: 300,
+            webPreferences: {
+                nodeIntegration: true
+            }
         });
 
         shortcuts.Register();
