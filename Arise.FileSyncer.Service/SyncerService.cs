@@ -27,6 +27,7 @@ namespace Arise.FileSyncer.Service
             Config = new SyncerConfig();
             InitialConfigLoad();
             Config.Save();
+            Config.SaveKey();
 
             // Load syncing and connection handler classes
             Peer = new SyncerPeer(Config.PeerSettings);
