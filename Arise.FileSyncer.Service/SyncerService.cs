@@ -15,6 +15,7 @@ namespace Arise.FileSyncer.Service
 
         private DiscoveryTimer discoveryTimer;
         private IpcController ipcController;
+        private KeyConfig keyConfig;
 
         private bool isRunning = false;
 
@@ -25,13 +26,27 @@ namespace Arise.FileSyncer.Service
 
             // Load config
             Config = new SyncerConfig();
-            InitialConfigLoad();
-            Config.Save();
-            Config.SaveKey();
+            LoadResult loadResult = Config.Load(CreatePeerSettings);
+            if (loadResult != LoadResult.Loaded)
+            {
+                if (loadResult == LoadResult.Created) Log.Info("Created new config");
+                if (Config.Save()) Log.Info("Saved config after create/upgrade");
+                else Log.Error("Failed to save config after create/upgrade");
+            }
+
+            // Load key
+            keyConfig = new KeyConfig();
+            loadResult = keyConfig.Load();
+            if (loadResult != LoadResult.Loaded)
+            {
+                if (loadResult == LoadResult.Created) Log.Info("Created new key");
+                if (keyConfig.Save()) Log.Info("Saved key after create/upgrade");
+                else Log.Error("Failed to save key after create/upgrade");
+            }
 
             // Load syncing and connection handler classes
             Peer = new SyncerPeer(Config.PeerSettings);
-            Listener = new NetworkListener(Config, Peer.AddConnection);
+            Listener = new NetworkListener(Config, keyConfig, Peer.AddConnection);
             Discovery = new NetworkDiscovery(Config, Peer, Listener);
             ProgressTracker = new ProgressTracker(Peer, 500);
 
@@ -67,12 +82,9 @@ namespace Arise.FileSyncer.Service
             //isRunning = false;
         }
 
-        private void InitialConfigLoad()
+        private static SyncerPeerSettings CreatePeerSettings()
         {
-            if (!Config.Load())
-            {
-                Config.Reset(new SyncerPeerSettings(Guid.NewGuid(), $"{Environment.MachineName}:{Environment.UserName}"));
-            }
+            return new SyncerPeerSettings(Guid.NewGuid(), $"{Environment.MachineName}:{Environment.UserName}");
         }
 
         #region IDisposable Support
