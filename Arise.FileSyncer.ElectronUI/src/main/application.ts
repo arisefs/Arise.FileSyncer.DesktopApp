@@ -4,6 +4,9 @@ import { SetAllowPairing, NewProfile, ReceivedProfileResult, SendProfile, Delete
 
 import * as shortcuts from "./shortcuts";
 import * as path from "path";
+import * as os from "os";
+
+const isWin = os.platform() === "win32";
 
 class Application {
     private mainWindow: BrowserWindow;
@@ -51,7 +54,7 @@ class Application {
      */
     public CreateMainWindow() {
         this.mainWindow = new BrowserWindow({
-            frame: false,
+            frame: !isWin,
             width: 900,
             height: 600,
             title: "Arise File Syncer - Manager",
@@ -61,6 +64,9 @@ class Application {
                 nodeIntegration: true
             }
         });
+
+        this.mainWindow.setMenu(null);
+        this.mainWindow.setMenuBarVisibility(false);
 
         shortcuts.Register();
         this.mainWindow.on("closed", this.onWindowClosed.bind(this));
