@@ -126,7 +126,6 @@ export class Header extends React.Component<HeaderProps, HeaderState> {
             speed: 0,
         };
 
-        let added = 0;
         for (let i = 0; i < keys.length; i++) {
             let conProgress = values[i].progress;
             if (conProgress && !conProgress.indeterminate) {
@@ -134,12 +133,7 @@ export class Header extends React.Component<HeaderProps, HeaderState> {
                 progress.current += conProgress.current;
                 progress.maximum += conProgress.maximum;
                 progress.speed += conProgress.speed;
-                added++;
             }
-        }
-
-        if (added != 0) {
-            progress.speed /= added;
         }
 
         this.progressUpdate(progress);
