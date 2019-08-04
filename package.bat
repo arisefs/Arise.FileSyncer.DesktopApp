@@ -21,6 +21,6 @@ exit
 
 :ZipPackages
 for /d %%X in (%~2/*) do (
-    call "C:\Program Files\7-Zip\7z.exe" a -tzip "%diroutput%/%~1-%%X.zip" "./%~2/%%X/*" || PAUSE
+    powershell.exe -noprofile -command "Compress-Archive -Path ./%~2/%%X/* -CompressionLevel Optimal -DestinationPath %diroutput%/%~1-%%X"
 )
 exit /b
