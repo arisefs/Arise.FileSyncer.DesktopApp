@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Arise.FileSyncer.Common" Version="1.0.0-CI-20190804-184911" />
+    <PackageReference Include="Arise.FileSyncer.Common" Version="1.0.0-CI-20190923-202105" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
