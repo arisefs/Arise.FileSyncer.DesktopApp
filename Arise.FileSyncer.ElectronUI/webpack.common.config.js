@@ -95,6 +95,10 @@ exports.rendererConfig = {
         ]
     },
     plugins: [
-        new CopyWebpackPlugin([{ from: 'src/static/' }], {})
+        new CopyWebpackPlugin({
+            patterns: [
+                { from: 'src/static/' },
+            ],
+        }),
     ]
 }
