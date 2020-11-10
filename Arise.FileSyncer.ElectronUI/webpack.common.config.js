@@ -1,8 +1,8 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 
-const node = "10.11.0";
-const chrome = "69";
+const node = "12.16";
+const chrome = "85";
 
 exports.config = {
     node: {

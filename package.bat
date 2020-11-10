@@ -5,6 +5,7 @@ set diroutput=Packages
 if exist %diroutput% (
     rd /s /q %diroutput%
 )
+mkdir %diroutput%
 
 :: Run the 2 projects packagers
 cd Arise.FileSyncer.ElectronUI
@@ -21,6 +22,6 @@ exit
 
 :ZipPackages
 for /d %%X in (%~2/*) do (
-    powershell.exe -noprofile -command "Compress-Archive -Path ./%~2/%%X/* -CompressionLevel Optimal -DestinationPath %diroutput%/%~1-%%X"
+    pwsh.exe -noprofile -command "Compress-Archive -Path ./%~2/%%X/* -CompressionLevel Optimal -DestinationPath %diroutput%/%~1-%%X"
 )
 exit /b

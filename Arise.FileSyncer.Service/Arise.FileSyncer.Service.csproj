@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Arise.FileSyncer.Common" Version="1.0.0-CI-20200525-132130" />
+    <PackageReference Include="Arise.FileSyncer.Common" Version="1.0.0-CI-20201110-223542" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">

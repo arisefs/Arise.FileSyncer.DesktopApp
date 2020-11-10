@@ -61,7 +61,8 @@ class Application {
             minWidth: 500,
             minHeight: 300,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                enableRemoteModule: true
             }
         });
 
