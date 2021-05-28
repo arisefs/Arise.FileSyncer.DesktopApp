@@ -25,24 +25,18 @@ namespace Arise.FileSyncer.Service.Ipc
         private readonly ConcurrentQueue<IpcMessage> senderQueue;
         private readonly AutoResetEvent sendEvent;
 
-        private readonly System.Timers.Timer updateTimer;
-
-        private readonly object connectLock = new object();
+        private readonly object connectLock = new();
 
         public IpcController(SyncerService service)
         {
             Service = service;
 
-            updateTimer = new System.Timers.Timer(1000.0);
-            updateTimer.Elapsed += UpdateTimer_Elapsed;
-            updateTimer.AutoReset = true;
-
             senderQueue = new ConcurrentQueue<IpcMessage>();
             sendEvent = new AutoResetEvent(false);
 
-            // Dedicated pipes for in and outgoing messages are needed!
-            ipcReceiver = new NamedPipeServerStream("AriseFileSyncerToServicePipe", PipeDirection.InOut);
-            ipcSender = new NamedPipeServerStream("AriseFileSyncerFromServicePipe", PipeDirection.InOut);
+            // Dedicated pipes for in and outgoing messages are needed! To support Node-IPC, InOut mode is needed!
+            ipcReceiver = new NamedPipeServerStream("AriseFileSyncerToServicePipe", PipeDirection.InOut); // In
+            ipcSender = new NamedPipeServerStream("AriseFileSyncerFromServicePipe", PipeDirection.InOut); // Out
 
             Task.Factory.StartNew(Receiver, TaskCreationOptions.LongRunning);
             Task.Factory.StartNew(Sender, TaskCreationOptions.LongRunning);
@@ -72,17 +66,6 @@ namespace Arise.FileSyncer.Service.Ipc
             }
         }
 
-        public void StartUpdateTimer()
-        {
-            updateTimer.Start();
-        }
-
-        private void UpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            if (ipcSender.IsConnected) { } //Send(new UpdateMessage().Fill(this));
-            else updateTimer.Stop();
-        }
-
         private void ProgressTracker_ProgressUpdate(object sender, ProgressUpdateEventArgs e)
         {
             if (ipcSender.IsConnected) Send(new UpdateMessage().Fill(this, e));
@@ -90,6 +73,7 @@ namespace Arise.FileSyncer.Service.Ipc
 
         private void OnMessageReceived(IpcMessage message)
         {
+            Log.Debug($"Received message: {message.Command}");
             message.Process(this);
         }
 
@@ -146,7 +130,7 @@ namespace Arise.FileSyncer.Service.Ipc
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("IPC Error: " + ex.Message);
+                    Log.Error("IPC (S) Error: " + ex.Message);
                     continue;
                 }
 
@@ -184,10 +168,7 @@ namespace Arise.FileSyncer.Service.Ipc
                 DisconnectSender();
 
                 // Clear senderQueue
-                while (!senderQueue.IsEmpty)
-                {
-                    while (senderQueue.TryDequeue(out IpcMessage message)) { }
-                }
+                senderQueue.Clear();
             }
         }
 
@@ -201,7 +182,7 @@ namespace Arise.FileSyncer.Service.Ipc
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("IPC Error: " + ex.Message);
+                    Log.Error("IPC (R) Error: " + ex.Message);
                     continue;
                 }
 
@@ -212,7 +193,7 @@ namespace Arise.FileSyncer.Service.Ipc
                 }
 
                 // It can be left without dispose. (?)
-                StreamReader reader = new StreamReader(ipcReceiver);
+                StreamReader reader = new(ipcReceiver);
                 IpcMessage message = null;
 
                 while (ipcReceiver.IsConnected)
@@ -239,18 +220,17 @@ namespace Arise.FileSyncer.Service.Ipc
                 }
 
                 reader.DiscardBufferedData();
-                reader = null;
 
                 DisconnectReceiver();
                 DisconnectSender();
             }
         }
 
-        private string ReadCommand(string json)
+        private static string ReadCommand(string json)
         {
             if (json.StartsWith("{\"Command\":", StringComparison.Ordinal))
             {
-                string subJson = json.Substring(12);
+                string subJson = json[12..];
                 int endIndex = subJson.IndexOf('"');
                 return subJson.Substring(0, endIndex);
             }
@@ -273,7 +253,6 @@ namespace Arise.FileSyncer.Service.Ipc
                     ipcReceiver?.Dispose();
                     ipcSender?.Dispose();
                     sendEvent.Dispose();
-                    updateTimer.Dispose();
                 }
 
                 disposedValue = true;

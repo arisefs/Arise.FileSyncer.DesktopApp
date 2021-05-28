@@ -7,7 +7,6 @@
         internal override void Process(IpcController ipc)
         {
             ipc.Send(new InitializationMessage().Fill(ipc));
-            ipc.StartUpdateTimer();
         }
     }
 }
