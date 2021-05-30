@@ -18,7 +18,7 @@ namespace Arise.FileSyncer.Service.Ipc
         public readonly SyncerService Service;
 
         private readonly NamedPipeServerStream ipcReceiver;
-        private readonly NamedPipeServerStream ipcSender;
+        private NamedPipeServerStream ipcSender;
         private volatile bool receiverConnected = false;
         private volatile bool senderConnected = false;
 
@@ -131,6 +131,12 @@ namespace Arise.FileSyncer.Service.Ipc
                 catch (Exception ex)
                 {
                     Log.Error("IPC (S) Error: " + ex.Message);
+
+                    // Fix pipe?
+                    ipcSender.Disconnect();
+                    ipcSender.Dispose();
+                    ipcSender = new NamedPipeServerStream("AriseFileSyncerFromServicePipe", PipeDirection.InOut);
+
                     continue;
                 }
 
