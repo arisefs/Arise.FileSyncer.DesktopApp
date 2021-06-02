@@ -1,0 +1,63 @@
+.editor-profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas: "topbar topbar" "leftbox rightbox";
+    grid-gap: 16px;
+    margin-top: 4px;
+}
+
+@media only screen and (max-width: 700px) {
+    .editor-profile-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        grid-template-areas: "topbar" "leftbox" "rightbox";
+    }
+}
+
+.editor-profile-grid-top {
+    grid-area: topbar;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+}
+
+.editor-profile-grid-left {
+    grid-area: leftbox;
+}
+
+.editor-profile-grid-right {
+    grid-area: rightbox;
+}
+
+.editor-profile-top-container {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: row;
+}
+
+.editor-profile-top-container input[type=text] {
+    display: flex;
+    flex: 1 1 auto;
+    box-sizing: border-box;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 2px;
+    margin: 4px;
+    padding: 4px;
+    height: 24px;
+    background-color: white
+}
+
+.editor-profile-top-label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    padding-bottom: 2px;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+.editor-profile-spacer {
+    width: 8px;
+    height: 8px;
+}

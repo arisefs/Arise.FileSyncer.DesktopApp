@@ -1,0 +1,61 @@
+.checkbox {
+    display: flex;
+    flex: 0 0 auto;
+    cursor: pointer;
+    align-items: center;
+}
+
+/* Customize the label */
+
+.checkbox-label {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    user-select: none;
+    cursor: pointer;
+    font-size: 13px;
+    padding-right: 4px;
+    height: 24px;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+/* Create a custom checkbox */
+
+.checkbox-checkmark {
+    cursor: pointer;
+    height: 16px;
+    width: 16px;
+    margin: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 2px;
+    background-color: white;
+    transition: background-color 0.1s;
+}
+
+/* On mouse-over, add a grey background color */
+
+.checkbox-checkmark-unchecked {
+    background-color: white;
+}
+
+.checkbox:hover .checkbox-checkmark-unchecked {
+    background-color: #F0F0F0;
+}
+
+.checkbox:hover:active .checkbox-checkmark-unchecked {
+    background-color: #E0E0E0;
+}
+
+/* When the checkbox is checked, add a blue background */
+
+.checkbox-checkmark-checked {
+    background-color: #2196F3;
+}
+
+.checkbox:hover .checkbox-checkmark-checked {
+    background-color: #40a9ff;
+}
+
+.checkbox:hover:active .checkbox-checkmark-checked {
+    background-color: #1283e0;
+}
