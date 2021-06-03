@@ -81,7 +81,7 @@ export class ProfileEditor extends React.Component<ProfileEditorProps, ProfileEd
         remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
             title: "Select the directory to synchronize",
             properties: ['openDirectory']
-        }, this.props.onDirectorySelected);
+        }).then((value)=> { this.props.onDirectorySelected(value.filePaths,value.bookmarks) });
     }
 }
 
