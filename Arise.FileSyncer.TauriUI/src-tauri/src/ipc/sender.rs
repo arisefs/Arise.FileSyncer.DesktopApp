@@ -3,7 +3,7 @@ use crate::messages::Message;
 use std::fs::File;
 use std::io::Write;
 
-const SENDER: &str = r"\\.\pipe\AriseFileSyncerToServicePipe";
+const SENDER: &str = "AriseFileSyncerToServicePipe";
 
 pub struct IpcSender {
     pipe: Option<File>,

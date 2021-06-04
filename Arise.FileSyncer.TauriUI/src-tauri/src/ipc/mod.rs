@@ -101,8 +101,11 @@ trait IpcConnection {
     fn connect(&mut self) -> Result<(), IpcError>;
 }
 
-fn open_pipe<P: AsRef<Path>>(path: P, is_recv: bool) -> Result<File, IpcError> {
-    match OpenOptions::new().read(is_recv).write(!is_recv).open(path) {
+fn open_pipe(name: &str, is_recv: bool) -> Result<File, IpcError> {
+    let pipe_name = format_pipe_name(name);
+    println!("{}", pipe_name);
+    
+    match OpenOptions::new().read(is_recv).write(!is_recv).open(pipe_name) {
         Ok(file) => Ok(file),
         Err(error) => {
             if error.kind() == std::io::ErrorKind::NotFound {
@@ -111,6 +114,15 @@ fn open_pipe<P: AsRef<Path>>(path: P, is_recv: bool) -> Result<File, IpcError> {
             Err(IpcError::IoError(error))
         }
     }
+}
+
+fn format_pipe_name(name: &str) -> String {
+    #[cfg(target_os = "windows")]
+    const BASE: &str = r"\\.\pipe\";
+    #[cfg(target_os = "linux")]
+    const BASE: &str = r"/tmp/CoreFxPipe_";
+
+    format!("{}{}", BASE, name)
 }
 
 #[derive(thiserror::Error)]
