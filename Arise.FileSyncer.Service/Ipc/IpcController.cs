@@ -73,7 +73,6 @@ namespace Arise.FileSyncer.Service.Ipc
 
         private void OnMessageReceived(IpcMessage message)
         {
-            Log.Debug($"Received message: {message.Command}");
             message.Process(this);
         }
 
