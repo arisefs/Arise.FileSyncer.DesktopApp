@@ -110,10 +110,7 @@ export class MainAppActivity extends React.Component<any, MainAppActivityState> 
     private loadNextNotification() {
         if (AppData.notificationStack.length() > 0) {
             this.allowNotificationEvent = false
-            let notification = AppData.notificationStack.shift()
-            if (notification === undefined) {
-                notification = { type: "", text: "", time: 0 }
-            }
+            let notification = AppData.notificationStack.shift() ?? { type: "", text: "", time: 0 }
 
             this.setState({
                 showNotification: true,
@@ -122,7 +119,6 @@ export class MainAppActivity extends React.Component<any, MainAppActivityState> 
 
             this.notifTimeout = setTimeout(() => {
                 this.setState({ showNotification: false })
-
                 this.notificationCooldown()
             }, notification.time)
         } else {
