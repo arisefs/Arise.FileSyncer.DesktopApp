@@ -2,25 +2,23 @@
 name = "app"
 version = "0.1.0"
 description = "A Tauri App"
-authors = ["you"]
+authors = [ "you" ]
 license = ""
 repository = ""
 default-run = "app"
 edition = "2018"
 build = "src/build.rs"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[build-dependencies]
-tauri-build = { version = "1.0.0-beta.0" }
-
 [dependencies]
-tauri = { version = "1.0.0-beta.1", features = ["api-all"] }
-serde = { version = "1.0", features = ["derive"] }
+tauri = {version = "1.0.0-beta.2",features = ["api-all"] }
+serde = { version = "1.0", features = [ "derive" ] }
 json = { package = "serde_json", version = "1.0" }
-chrono = { version = "0.4.19", features = ["serde"] }
+chrono = { version = "0.4.19", features = [ "serde" ] }
 channel = { package = "crossbeam-channel", version = "0.5" }
 thiserror = "1.0"
+
+[build-dependencies]
+tauri-build = { version = "1.0.0-beta.1" }
 
 [features]
 default = [ "custom-protocol" ]

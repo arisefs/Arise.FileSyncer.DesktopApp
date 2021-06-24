@@ -6,7 +6,6 @@ use channel::{Receiver, Sender};
 use receiver::IpcReceiver;
 use sender::IpcSender;
 use std::fs::{File, OpenOptions};
-use std::path::Path;
 use std::time::Duration;
 
 ////! TODO
@@ -103,7 +102,7 @@ trait IpcConnection {
 
 fn open_pipe(name: &str, is_recv: bool) -> Result<File, IpcError> {
     let pipe_name = format_pipe_name(name);
-    println!("{}", pipe_name);
+    // println!("{}", pipe_name);
     
     match OpenOptions::new().read(is_recv).write(!is_recv).open(pipe_name) {
         Ok(file) => Ok(file),
