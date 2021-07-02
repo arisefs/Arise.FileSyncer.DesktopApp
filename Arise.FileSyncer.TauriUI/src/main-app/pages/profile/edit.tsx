@@ -1,13 +1,14 @@
 import React from "react"
 import AppData from "../../../app-data/app-data"
 import { invoke } from "@tauri-apps/api/tauri"
-import { listen, UnlistenFn, Event } from "@tauri-apps/api/event"
 import { PageTitleBar } from "../../../components/page-title-bar"
 import { Button } from "../../../components/button"
 import { goBack } from "../../page-controller"
 import { pushNotification } from "../../notification-manager"
 import { ProfileEditor, handleTextBoxChange, handleCheckBoxChange, handleDirectorySelected, checkEditorState } from "../../../components/editor"
 import { EditProfileResult, EditProfile } from "../../../ipc/messages"
+import { eventEditProfileResult } from "../../../ipc/ipcEvents"
+import { Disposable } from "../../../shared/typed-event"
 
 export interface EditProfilePageProps {
     id: string,
@@ -22,17 +23,16 @@ interface EditProfilePageState {
     allowReceive: boolean,
     allowDelete: boolean,
     skipHidden: boolean,
-
-    eventUnlisten: UnlistenFn | null,
 }
 
 export class EditProfilePage extends React.Component<EditProfilePageProps, EditProfilePageState> {
-    private handleTextBoxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    private handleCheckBoxChange: (name: string) => void;
-    private handleDirectorySelected: (path: string) => void;
+    private handleTextBoxChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+    private handleCheckBoxChange: (name: string) => void
+    private handleDirectorySelected: (path: string) => void
 
-    private profileName: string;
-    private waiting = false;
+    private resultEvent?: Disposable
+    private profileName: string
+    private waiting = false
 
     constructor(props: EditProfilePageProps) {
         super(props)
@@ -48,7 +48,6 @@ export class EditProfilePage extends React.Component<EditProfilePageProps, EditP
             allowReceive: profile.allowReceive,
             allowDelete: profile.allowDelete,
             skipHidden: profile.skipHidden,
-            eventUnlisten: null
         }
 
         this.handleTextBoxChange = handleTextBoxChange.bind(this)
@@ -56,19 +55,14 @@ export class EditProfilePage extends React.Component<EditProfilePageProps, EditP
         this.handleDirectorySelected = handleDirectorySelected.bind(this)
 
         this.onSave = this.onSave.bind(this)
-        this.onResult = this.onResult.bind(this)
     }
 
     public async componentDidMount() {
-        this.setState({ eventUnlisten: await listen("srvEditProfileResult", this.onResult) })
+        this.resultEvent = eventEditProfileResult.on(this.onResult.bind(this))
     }
 
     public componentWillUnmount() {
-        if (this.state.eventUnlisten != null) {
-            //this.state.eventUnlisten()
-        }
-
-        this.setState({ eventUnlisten: null })
+        this.resultEvent?.dispose()
     }
 
     public render() {
@@ -116,8 +110,8 @@ export class EditProfilePage extends React.Component<EditProfilePageProps, EditP
         }
     }
 
-    private onResult(e:Event<EditProfileResult.Message>) {
-        if (e.payload.Success) {
+    private onResult(message: EditProfileResult.Message) {
+        if (message.Success) {
             pushNotification({
                 type: "success",
                 text: "Profile \"" + this.profileName + "\" has been updated",

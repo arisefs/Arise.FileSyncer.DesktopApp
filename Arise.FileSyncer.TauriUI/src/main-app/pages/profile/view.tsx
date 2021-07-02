@@ -1,15 +1,15 @@
 import React from "react"
 import AppData, { Shared, Interfaces, Extensions } from "../../../app-data/app-data"
 import { invoke } from "@tauri-apps/api/tauri"
-import { listen, UnlistenFn, Event } from "@tauri-apps/api/event"
 import { PageTitleBar } from "../../../components/page-title-bar"
-import { Disposable } from "../../../shared/typed-event"
 import { Button } from "../../../components/button"
 import { DeleteProfileResult } from "../../../ipc/messages"
 import { goBack, changePage } from "../../page-controller"
 import { ShareProfilePage, ShareProfilePageProps } from "./share"
 import { pushNotification } from "../../notification-manager"
 import { EditProfilePage, EditProfilePageProps } from "./edit"
+import { eventDeleteProfileResult } from "../../../ipc/ipcEvents"
+import { Disposable } from "../../../shared/typed-event"
 
 export interface ViewProfilePageProps {
     id: string,
@@ -17,37 +17,30 @@ export interface ViewProfilePageProps {
 
 interface ViewProfilePageState {
     profile: Interfaces.Profile,
-    eventUnlisten: UnlistenFn|null
 }
 
 export class ViewProfilePage extends React.Component<ViewProfilePageProps, ViewProfilePageState> {
-    private profilesEvent?: Disposable;
+    private profilesEvent?: Disposable
+    private resultEvent?: Disposable
 
     constructor(props: ViewProfilePageProps) {
         super(props)
-        this.state = { profile: AppData.profiles.get(this.props.id), eventUnlisten: null }
+        this.state = { profile: AppData.profiles.get(this.props.id) }
 
         this.onEdit = this.onEdit.bind(this)
         this.onShare = this.onShare.bind(this)
         this.onDelete = this.onDelete.bind(this)
-        this.onDeleteResult = this.onDeleteResult.bind(this)
     }
 
     public async componentDidMount() {
         this.profilesEvent = AppData.profiles.on(this.onProfilesChanged.bind(this))
+        this.resultEvent = eventDeleteProfileResult.on(this.onDeleteResult.bind(this))
         this.onProfilesChanged(AppData.profiles)
-
-        this.setState({ eventUnlisten: await listen("srvDeleteProfileResult", this.onDeleteResult) })
     }
 
     public componentWillUnmount() {
         this.profilesEvent?.dispose()
-
-        if (this.state.eventUnlisten != null) {
-            //this.state.eventUnlisten()
-        }
-
-        this.setState({ eventUnlisten: null })
+        this.resultEvent?.dispose()
     }
 
     public render() {
@@ -101,8 +94,8 @@ export class ViewProfilePage extends React.Component<ViewProfilePageProps, ViewP
         invoke("delete_profile", { profileId })
     }
 
-    private onDeleteResult(e:Event<DeleteProfileResult.Message>) {
-        if (e.payload.Success) {
+    private onDeleteResult(message: DeleteProfileResult.Message) {
+        if (message.Success) {
             pushNotification({
                 type: "success",
                 text: "Profile \"" + this.state.profile.name + "\" has been successfully deleted",

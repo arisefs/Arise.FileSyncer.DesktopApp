@@ -24,7 +24,7 @@ interface Connection {
 }
 
 export class ShareProfilePage extends React.Component<ShareProfilePageProps, ShareProfilePageState> {
-    private connectionsEvent?: Disposable;
+    private connectionsEvent?: Disposable
 
     constructor(props: ShareProfilePageProps) {
         super(props)

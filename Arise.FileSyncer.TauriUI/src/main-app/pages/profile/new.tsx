@@ -1,14 +1,15 @@
 import React from "react"
 import { invoke } from "@tauri-apps/api/tauri"
-import { listen, UnlistenFn, Event } from "@tauri-apps/api/event"
 import { PageTitleBar } from "../../../components/page-title-bar"
 import { Button } from "../../../components/button"
 import { NewProfileResult, NewProfile } from "../../../ipc/messages"
 import { goBack } from "../../page-controller"
 import { pushNotification } from "../../notification-manager"
 import { ProfileEditor, handleTextBoxChange, handleCheckBoxChange, handleDirectorySelected, checkEditorState } from "../../../components/editor"
+import { eventNewProfileResult } from "../../../ipc/ipcEvents"
+import { Disposable } from "../../../shared/typed-event"
 
-interface NewProfilePageProps {}
+interface NewProfilePageProps { }
 
 interface NewProfilePageState {
     waiting: boolean,
@@ -19,16 +20,15 @@ interface NewProfilePageState {
     allowReceive: boolean,
     allowDelete: boolean,
     skipHidden: boolean,
-
-    eventUnlisten?: UnlistenFn
 }
 
 export class NewProfilePage extends React.Component<NewProfilePageProps, NewProfilePageState> {
-    private handleTextBoxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    private handleCheckBoxChange: (name: string) => void;
-    private handleDirectorySelected: (path: string) => void;
+    private handleTextBoxChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+    private handleCheckBoxChange: (name: string) => void
+    private handleDirectorySelected: (path: string) => void
 
-    private waiting = false;
+    private resultEvent?: Disposable
+    private waiting = false
 
     constructor(props: NewProfilePageProps) {
         super(props)
@@ -40,27 +40,21 @@ export class NewProfilePage extends React.Component<NewProfilePageProps, NewProf
             allowReceive: false,
             allowDelete: false,
             skipHidden: true,
-            eventUnlisten: undefined
         }
 
         this.handleTextBoxChange = handleTextBoxChange.bind(this)
         this.handleCheckBoxChange = handleCheckBoxChange.bind(this)
         this.handleDirectorySelected = handleDirectorySelected.bind(this)
 
-        this.onResult = this.onResult.bind(this)
         this.onCreate = this.onCreate.bind(this)
     }
 
     public async componentDidMount() {
-        this.setState({ eventUnlisten: await listen("srvNewProfileResult", this.onResult) })
+        this.resultEvent = eventNewProfileResult.on(this.onResult.bind(this))
     }
 
     public componentWillUnmount() {
-        if (this.state.eventUnlisten !== undefined) {
-            //this.state.eventUnlisten()
-        }
-
-        this.setState({ eventUnlisten: undefined })
+        this.resultEvent?.dispose()
     }
 
     public render() {
@@ -108,8 +102,8 @@ export class NewProfilePage extends React.Component<NewProfilePageProps, NewProf
         }
     }
 
-    private onResult(e:Event<NewProfileResult.Message>) {
-        if (e.payload.Success) {
+    private onResult(message: NewProfileResult.Message) {
+        if (message.Success) {
             pushNotification({
                 type: "success",
                 text: "Profile \"" + this.state.name + "\" has been successfully created",

@@ -4,42 +4,37 @@ import { getActivityTypeByName } from "./activity-loader"
 import { Initialization } from "../ipc/messages"
 import { MainAppActivity } from "./activities/act-main-app"
 import { invoke } from "@tauri-apps/api/tauri"
-import { listen, UnlistenFn, Event } from "@tauri-apps/api/event"
 import { ProfileListPage } from "../main-app/pages/profile/list"
+import { eventLoadActivity, eventInitialization } from "../ipc/ipcEvents"
+import { Disposable } from "../shared/typed-event"
 
 import "./window-display.css"
 
 interface WindowDisplayState {
     activity: any,
     props: any,
-    events: UnlistenFn[]
 }
 
 export default class WindowDisplay extends React.Component<any, WindowDisplayState> {
+    private loadActivityEvent?: Disposable
+    private initializationEvent?: Disposable
+
     constructor(props: any) {
         super(props)
-        this.state = { activity: null, props: null, events: [] }
-
-        this.onLoadActivity = this.onLoadActivity.bind(this)
-        this.onInitialization = this.onInitialization.bind(this)
+        this.state = { activity: null, props: null }
     }
 
     public async componentDidMount() {
-        const evLoad = await listen("window-load-activity", this.onLoadActivity)
-        const evInit = await listen("srvInitialization", this.onInitialization)
-
-        this.setState((prevState) => ({ events: [...prevState.events, evLoad, evInit] }))
+        this.loadActivityEvent = eventLoadActivity.on(this.onLoadActivity.bind(this))
+        this.initializationEvent = eventInitialization.on(this.onInitialization.bind(this))
 
         invoke("window_ready")
         console.log("WindowDisplay is ready")
     }
 
     public componentWillUnmount() {
-        //this.state.events.forEach((unlisten) => {
-        //    unlisten()
-        //})
-
-        this.setState({ events: [] })
+        this.loadActivityEvent?.dispose()
+        this.initializationEvent?.dispose()
     }
 
     public render() {
@@ -58,12 +53,11 @@ export default class WindowDisplay extends React.Component<any, WindowDisplaySta
     }
 
     // TODO: Update to proper type
-    private onLoadActivity(e: Event<any>) {
-        this.SetActivity(getActivityTypeByName(e.payload.widgetName), e.payload.props)
+    private onLoadActivity(e: any) {
+        this.SetActivity(getActivityTypeByName(e.widgetName), e.props)
     }
 
-    private onInitialization(e: Event<Initialization.Message>) {
-        const message = e.payload
+    private onInitialization(message: Initialization.Message) {
         AppData.reset()
 
         // Send received data to AppData

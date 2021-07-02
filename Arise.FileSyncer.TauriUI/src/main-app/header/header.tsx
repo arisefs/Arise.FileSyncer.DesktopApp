@@ -36,7 +36,7 @@ interface ProgressBarState {
 }
 
 export class Header extends React.Component<HeaderProps, HeaderState> {
-    private connectionsEvent?: Disposable = undefined;
+    private connectionsEvent?: Disposable
 
     constructor(props: any) {
         super(props)

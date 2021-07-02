@@ -14,7 +14,7 @@ interface ConnectionState {
 }
 
 export class ConnectionList extends React.Component<any, ConnectionListState> {
-    private conEvent?: Disposable;
+    private conEvent?: Disposable
 
     constructor(props: any) {
         super(props)

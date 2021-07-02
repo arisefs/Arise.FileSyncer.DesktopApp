@@ -18,12 +18,12 @@ interface ReceivedProfilePageState {
 }
 
 export class ReceivedProfilePage extends React.Component<ReceivedProfile.Data, ReceivedProfilePageState> {
-    private handleTextBoxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    private handleCheckBoxChange: (name: string) => void;
-    private handleDirectorySelected: (path: string) => void;
+    private handleTextBoxChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+    private handleCheckBoxChange: (name: string) => void
+    private handleDirectorySelected: (path: string) => void
 
-    private connectionName = "Unknown";
-    private waiting = false;
+    private connectionName = "Unknown"
+    private waiting = false
 
     constructor(props: ReceivedProfile.Data) {
         super(props)

@@ -1,9 +1,9 @@
 import { TypedEvent, Listener } from "./typed-event"
 
 export default class SharedData<T> {
-    private data: T;
-    private defaultValue: T;
-    private event: TypedEvent<T> = new TypedEvent<T>();
+    private data: T
+    private defaultValue: T
+    private event: TypedEvent<T> = new TypedEvent<T>()
 
     constructor(defaultValue: T) {
         this.defaultValue = defaultValue

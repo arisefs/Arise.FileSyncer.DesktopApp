@@ -14,12 +14,12 @@ interface MainAppActivityState {
 }
 
 export class MainAppActivity extends React.Component<any, MainAppActivityState> {
-    private pageStackEvent?: Disposable;
-    private notificationEvent?: Disposable;
-    private allowNotificationEvent: boolean;
+    private pageStackEvent?: Disposable
+    private notificationEvent?: Disposable
+    private allowNotificationEvent: boolean
 
-    private notifTimeout: NodeJS.Timer | null = null;
-    private notifCooldown: NodeJS.Timer | null = null;
+    private notifTimeout?: number
+    private notifCooldown?: number
 
     constructor(props: any) {
         super(props)
@@ -46,13 +46,8 @@ export class MainAppActivity extends React.Component<any, MainAppActivityState> 
         this.pageStackEvent?.dispose()
         this.notificationEvent?.dispose()
 
-        if (this.notifTimeout != null) {
-            clearTimeout(this.notifTimeout)
-        }
-
-        if (this.notifCooldown != null) {
-            clearTimeout(this.notifCooldown)
-        }
+        window.clearTimeout(this.notifTimeout)
+        window.clearTimeout(this.notifCooldown)
     }
 
     public render() {
@@ -117,7 +112,7 @@ export class MainAppActivity extends React.Component<any, MainAppActivityState> 
                 notification: notification
             })
 
-            this.notifTimeout = setTimeout(() => {
+            this.notifTimeout = window.setTimeout(() => {
                 this.setState({ showNotification: false })
                 this.notificationCooldown()
             }, notification.time)
@@ -127,7 +122,7 @@ export class MainAppActivity extends React.Component<any, MainAppActivityState> 
     }
 
     private notificationCooldown() {
-        this.notifCooldown = setTimeout(() => {
+        this.notifCooldown = window.setTimeout(() => {
             this.loadNextNotification()
         }, 500)
     }

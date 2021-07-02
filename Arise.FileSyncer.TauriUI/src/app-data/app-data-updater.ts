@@ -13,17 +13,17 @@ import {
     ReceivedProfile
 } from "../ipc/messages"
 
-export default function initUpdater() {
+export default async function initUpdater() {
     console.log("Initializing IPC listeners")
 
-    listen("srvConnectionAdded", onConnectionAdded)
-    listen("srvConnectionVerified", onConnectionVerified)
-    listen("srvConnectionRemoved", onConnectionRemoved)
-    listen("srvUpdate", onUpdate)
-    listen("srvProfileAdded", onProfileAdded)
-    listen("srvProfileChanged", onProfileChanged)
-    listen("srvProfileRemoved", onProfileRemoved)
-    listen("srvReceivedProfile", onReceivedProfile)
+    await listen("srvConnectionAdded", onConnectionAdded)
+    await listen("srvConnectionVerified", onConnectionVerified)
+    await listen("srvConnectionRemoved", onConnectionRemoved)
+    await listen("srvUpdate", onUpdate)
+    await listen("srvProfileAdded", onProfileAdded)
+    await listen("srvProfileChanged", onProfileChanged)
+    await listen("srvProfileRemoved", onProfileRemoved)
+    await listen("srvReceivedProfile", onReceivedProfile)
 }
 
 function onConnectionAdded(e: Event<ConnectionAdded.Message>) {

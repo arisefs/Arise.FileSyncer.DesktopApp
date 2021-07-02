@@ -1,5 +1,7 @@
 import initUpdater from "./app-data/app-data-updater"
-initUpdater()
+import initIpcEvents from "./ipc/ipcEvents"
+await initUpdater()
+await initIpcEvents()
 
 import React from "react"
 import ReactDOM from "react-dom"

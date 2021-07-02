@@ -17,7 +17,7 @@ interface ProfileData extends Interfaces.Profile {
 }
 
 export class ProfileListPage extends React.Component<any, ProfileListPageState> {
-    private profilesEvent?: Disposable;
+    private profilesEvent?: Disposable
 
     constructor(props: any) {
         super(props)

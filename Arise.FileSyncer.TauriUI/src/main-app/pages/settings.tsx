@@ -14,7 +14,7 @@ interface SettingsPageState {
 }
 
 export class SettingsPage extends React.Component<any, SettingsPageState> {
-    private handleTextBoxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    private handleTextBoxChange: (event: React.ChangeEvent<HTMLInputElement>) => void
 
     constructor(props: any) {
         super(props)
@@ -36,8 +36,8 @@ export class SettingsPage extends React.Component<any, SettingsPageState> {
 
     private async fetchVersions() {
         this.setState({
-            versionApp: "v"+await app.getVersion(),
-            versionTauri: "v"+await app.getTauriVersion()
+            versionApp: "v" + await app.getVersion(),
+            versionTauri: "v" + await app.getTauriVersion()
         })
     }
 

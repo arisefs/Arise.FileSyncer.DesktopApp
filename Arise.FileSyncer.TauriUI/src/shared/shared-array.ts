@@ -1,8 +1,8 @@
 import { TypedEvent, Listener } from "./typed-event"
 
 export default class SharedArray<T> {
-    private array: T[] = [];
-    private event: TypedEvent<SharedArray<T>> = new TypedEvent<SharedArray<T>>();
+    private array: T[] = []
+    private event: TypedEvent<SharedArray<T>> = new TypedEvent<SharedArray<T>>()
 
     /**
      * getArray: returns a copy of the array

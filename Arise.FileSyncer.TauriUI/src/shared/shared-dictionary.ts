@@ -2,9 +2,9 @@ import { TypedEvent, Listener } from "./typed-event"
 
 // Base source: https://www.dustinhorne.com/post/2016/06/09/implementing-a-dictionary-in-typescript
 export default class SharedDictionary<T> {
-    private items: { [index: string]: T } = {};
-    private counter = 0;
-    private event: TypedEvent<SharedDictionary<T>> = new TypedEvent<SharedDictionary<T>>();
+    private items: { [index: string]: T } = {}
+    private counter = 0
+    private event: TypedEvent<SharedDictionary<T>> = new TypedEvent<SharedDictionary<T>>()
 
     public containsKey(key: string): boolean {
         return this.items.hasOwnProperty(key)

@@ -1,15 +1,15 @@
 export interface Listener<T> {
-    (event: T): any;
+    (event: T): any
 }
 
 export interface Disposable {
-    dispose(): any;
+    dispose(): any
 }
 
 /** passes through events as they happen. You will not get events from before you start listening */
 export class TypedEvent<T> {
-    private listeners: Listener<T>[] = [];
-    private listenersOncer: Listener<T>[] = [];
+    private listeners: Listener<T>[] = []
+    private listenersOncer: Listener<T>[] = []
 
     on = (listener: Listener<T>): Disposable => {
         this.listeners.push(listener)
