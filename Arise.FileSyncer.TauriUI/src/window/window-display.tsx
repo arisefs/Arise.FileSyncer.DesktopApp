@@ -24,7 +24,7 @@ export default class WindowDisplay extends React.Component<any, WindowDisplaySta
         this.state = { activity: null, props: null }
     }
 
-    public async componentDidMount() {
+    public componentDidMount() {
         this.loadActivityEvent = eventLoadActivity.on(this.onLoadActivity.bind(this))
         this.initializationEvent = eventInitialization.on(this.onInitialization.bind(this))
 
