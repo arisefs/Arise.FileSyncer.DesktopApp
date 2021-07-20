@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.Json;
 using Arise.FileSyncer.Core;
+using Arise.FileSyncer.Service.Ipc.Messages;
 
 namespace Arise.FileSyncer.Service.Ipc
 {
@@ -47,7 +49,7 @@ namespace Arise.FileSyncer.Service.Ipc
             return CreateClass(GetClassType(command));
         }
 
-        private static Type GetClassType(string command)
+        public static Type GetClassType(string command)
         {
             if (messageTypes.TryGetValue(command, out Type classType)) return classType;
             else throw new Exception("NetMessage: No class found for command");
@@ -56,6 +58,33 @@ namespace Arise.FileSyncer.Service.Ipc
         private static IpcMessage CreateClass(Type messageClassType)
         {
             return (IpcMessage)Activator.CreateInstance(messageClassType);
+        }
+
+        public static IpcMessage Deserialize(string command, string json)
+        {
+            return command switch
+            {
+                "connectionAdded" => JsonSerializer.Deserialize<ConnectionAddedMessage>(json),
+                "connectionRemoved" => JsonSerializer.Deserialize<ConnectionRemovedMessage>(json),
+                "connectionVerified" => JsonSerializer.Deserialize<ConnectionVerifiedMessage>(json),
+                "deleteProfile" => JsonSerializer.Deserialize<DeleteProfileMessage>(json),
+                "deleteProfileResult" => JsonSerializer.Deserialize<DeleteProfileResultMessage>(json),
+                "editProfile" => JsonSerializer.Deserialize<EditProfileMessage>(json),
+                "editProfileResult" => JsonSerializer.Deserialize<EditProfileMessageResult>(json),
+                "initialization" => JsonSerializer.Deserialize<InitializationMessage>(json),
+                "newProfile" => JsonSerializer.Deserialize<NewProfileMessage>(json),
+                "newProfileResult" => JsonSerializer.Deserialize<NewProfileResultMessage>(json),
+                "profileAdded" => JsonSerializer.Deserialize<ProfileAddedMessage>(json),
+                "profileChanged" => JsonSerializer.Deserialize<ProfileChangedMessage>(json),
+                "profileRemoved" => JsonSerializer.Deserialize<ProfileRemovedMessage>(json),
+                "receivedProfile" => JsonSerializer.Deserialize<ReceivedProfileMessage>(json),
+                "receivedProfileResult" => JsonSerializer.Deserialize<ReceivedProfileResultMessage>(json),
+                "sendProfile" => JsonSerializer.Deserialize<SendProfileMessage>(json),
+                "setAllowPairing" => JsonSerializer.Deserialize<SetAllowPairingMessage>(json),
+                "update" => JsonSerializer.Deserialize<UpdateMessage>(json),
+                "welcome" => JsonSerializer.Deserialize<WelcomeMessage>(json),
+                _ => throw new Exception("Invalid message command"),
+            };
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Arise.FileSyncer.Service.Ipc.Messages
 
         internal override void Process(IpcController ipc)
         {
-            SyncProfile profile = new SyncProfile.Creator()
+            SyncProfile profile = new()
             {
                 Key = Guid.NewGuid(),
                 Name = DisplayName,
@@ -28,7 +28,7 @@ namespace Arise.FileSyncer.Service.Ipc.Messages
                 SkipHidden = SkipHidden
             };
 
-            bool success = ipc.Service.Peer.AddProfile(Guid.NewGuid(), profile);
+            bool success = ipc.Service.Peer.Profiles.AddProfile(Guid.NewGuid(), profile);
             ipc.Send(new NewProfileResultMessage() { Success = success });
         }
     }

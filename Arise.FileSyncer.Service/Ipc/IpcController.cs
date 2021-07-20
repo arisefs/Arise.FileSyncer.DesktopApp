@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.IO.Pipes;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Arise.FileSyncer.Common;
@@ -43,13 +44,13 @@ namespace Arise.FileSyncer.Service.Ipc
 
             Service.ProgressTracker.ProgressUpdate += ProgressTracker_ProgressUpdate;
 
-            Service.Peer.ConnectionAdded += (s, e) => Send(new ConnectionAddedMessage().Fill(e));
-            Service.Peer.ConnectionVerified += (s, e) => Send(new ConnectionVerifiedMessage().Fill(e));
-            Service.Peer.ConnectionRemoved += (s, e) => Send(new ConnectionRemovedMessage().Fill(e));
-            Service.Peer.ProfileReceived += (s, e) => Send(new ReceivedProfileMessage().Fill(e));
-            Service.Peer.ProfileAdded += (s, e) => Send(new ProfileAddedMessage().Fill(e));
-            Service.Peer.ProfileChanged += (s, e) => Send(new ProfileChangedMessage().Fill(e));
-            Service.Peer.ProfileRemoved += (s, e) => Send(new ProfileRemovedMessage().Fill(e));
+            Service.Peer.Connections.ConnectionAdded += (s, e) => Send(new ConnectionAddedMessage().Fill(e));
+            Service.Peer.Connections.ConnectionVerified += (s, e) => Send(new ConnectionVerifiedMessage().Fill(e));
+            Service.Peer.Connections.ConnectionRemoved += (s, e) => Send(new ConnectionRemovedMessage().Fill(e));
+            Service.Peer.Profiles.ProfileReceived += (s, e) => Send(new ReceivedProfileMessage().Fill(e));
+            Service.Peer.Profiles.ProfileAdded += (s, e) => Send(new ProfileAddedMessage().Fill(e));
+            Service.Peer.Profiles.ProfileChanged += (s, e) => Send(new ProfileChangedMessage().Fill(e));
+            Service.Peer.Profiles.ProfileRemoved += (s, e) => Send(new ProfileRemovedMessage().Fill(e));
             Service.Peer.PairingRequest += (s, e) =>
             {
                 Log.Info("Auto accepting pair: " + e.DisplayName);
@@ -151,12 +152,14 @@ namespace Arise.FileSyncer.Service.Ipc
                     {
                         if (senderQueue.TryDequeue(out IpcMessage message))
                         {
-                            string json = Json.Serialize(message) + "\n";
-                            byte[] binaryJson = Encoding.UTF8.GetBytes(json);
+                            var classType = IpcMessageFactory.GetClassType(message.Command);
+                            byte[] binaryJson = JsonSerializer.SerializeToUtf8Bytes(Convert.ChangeType(message, classType));
 
                             try
                             {
                                 ipcSender.Write(binaryJson, 0, binaryJson.Length);
+                                ipcSender.WriteByte(0x0A); // NewLine
+                                ipcSender.Flush();
                             }
                             catch (Exception ex)
                             {
@@ -209,8 +212,7 @@ namespace Arise.FileSyncer.Service.Ipc
                         if (!string.IsNullOrEmpty(json))
                         {
                             string command = ReadCommand(json);
-                            message = IpcMessageFactory.Create(command);
-                            Json.FillObject(message, json);
+                            message = IpcMessageFactory.Deserialize(command, json);
                         }
                     }
                     catch (Exception ex)

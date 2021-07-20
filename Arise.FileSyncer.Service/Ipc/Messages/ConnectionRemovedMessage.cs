@@ -9,7 +9,7 @@ namespace Arise.FileSyncer.Service.Ipc.Messages
 
         public Guid Id { get; set; }
 
-        internal IpcMessage Fill(ConnectionRemovedEventArgs e)
+        internal IpcMessage Fill(ConnectionEventArgs e)
         {
             Id = e.Id;
             return this;

@@ -19,9 +19,9 @@ namespace Arise.FileSyncer.Service.Ipc.Messages
         {
             bool success = false;
 
-            if (ipc.Service.Peer.Settings.Profiles.TryGetValue(Id, out var oldProfile))
+            if (ipc.Service.Peer.Profiles.GetProfile(Id, out var oldProfile))
             {
-                SyncProfile newProfile = new SyncProfile.Creator(oldProfile)
+                SyncProfile newProfile = new(oldProfile)
                 {
                     Name = Name,
                     RootDirectory = PathHelper.GetCorrect(RootDirectory, true),
@@ -30,7 +30,7 @@ namespace Arise.FileSyncer.Service.Ipc.Messages
                     AllowDelete = AllowDelete,
                 };
 
-                success = ipc.Service.Peer.UpdateProfile(Id, newProfile);
+                success = ipc.Service.Peer.Profiles.UpdateProfile(Id, newProfile);
             }
             else
             {

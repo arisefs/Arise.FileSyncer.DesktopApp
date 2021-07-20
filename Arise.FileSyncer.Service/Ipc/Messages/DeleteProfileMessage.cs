@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Arise.FileSyncer.Service.Ipc.Messages
 {
@@ -10,7 +10,7 @@ namespace Arise.FileSyncer.Service.Ipc.Messages
 
         internal override void Process(IpcController ipc)
         {
-            bool success = ipc.Service.Peer.RemoveProfile(ProfileId);
+            bool success = ipc.Service.Peer.Profiles.RemoveProfile(ProfileId);
             ipc.Send(new DeleteProfileResultMessage() { Success = success });
         }
     }
