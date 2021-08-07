@@ -54,7 +54,7 @@ namespace Arise.FileSyncer.Service
 
             // Load syncing and connection handler classes
             Peer = new SyncerPeer(configData.PeerSettings, deviceKeyManager, profileManager);
-            Listener = new NetworkListener(Peer, keyConfig, Config.ListenerAddressFamily, Peer.AddConnection);
+            Listener = new NetworkListener(Peer, keyConfig, Config.ListenerAddressFamily);
             Discovery = new NetworkDiscovery(Config, Peer, Listener);
             ProgressTracker = new ProgressTracker(Peer, 500);
 
