@@ -1,0 +1,25 @@
+[package]
+name = "app"
+version = "0.1.0"
+description = "A Tauri App"
+authors = ["you"]
+license = ""
+repository = ""
+default-run = "app"
+edition = "2018"
+build = "src/build.rs"
+
+[dependencies]
+tauri = { version = "1.0.0-beta.6", features = ["api-all"] }
+serde = { version = "1.0", features = ["derive"] }
+json = { package = "serde_json", version = "1.0" }
+chrono = { version = "0.4", features = ["serde"] }
+channel = { package = "crossbeam-channel", version = "0.5" }
+thiserror = "1.0"
+
+[build-dependencies]
+tauri-build = { version = "1.0.0-beta.4" }
+
+[features]
+default = [ "custom-protocol" ]
+custom-protocol = [ "tauri/custom-protocol" ]

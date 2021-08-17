@@ -1,12 +1,16 @@
 using System;
+using System.Threading.Tasks;
 using Arise.FileSyncer.Common;
 using Arise.FileSyncer.Core;
+using Arise.FileSyncer.Core.Peer;
 using Arise.FileSyncer.Service.Ipc;
 
 namespace Arise.FileSyncer.Service
 {
     internal class SyncerService : IDisposable
     {
+        private const bool SupportTimestamp = true;
+
         public NetworkDiscovery Discovery { get; private set; }
         public NetworkListener Listener { get; private set; }
         public SyncerConfig Config { get; private set; }
@@ -26,11 +30,11 @@ namespace Arise.FileSyncer.Service
 
             // Load config
             Config = new SyncerConfig();
-            LoadResult loadResult = Config.Load(CreatePeerSettings);
+            LoadResult loadResult = Config.Load(CreatePeerSettings(), out var configData);
             if (loadResult != LoadResult.Loaded)
             {
                 if (loadResult == LoadResult.Created) Log.Info("Created new config");
-                if (Config.Save()) Log.Info("Saved config after create/upgrade");
+                if (Config.Save(configData)) Log.Info("Saved config after create/upgrade");
                 else Log.Error("Failed to save config after create/upgrade");
             }
 
@@ -44,17 +48,21 @@ namespace Arise.FileSyncer.Service
                 else Log.Error("Failed to save key after create/upgrade");
             }
 
+            // Create managers from loaded config
+            DeviceKeyManager deviceKeyManager = new(configData.DeviceKeys);
+            ProfileManager profileManager = new(configData.Profiles);
+
             // Load syncing and connection handler classes
-            Peer = new SyncerPeer(Config.PeerSettings);
-            Listener = new NetworkListener(Config, keyConfig, Peer.AddConnection);
+            Peer = new SyncerPeer(configData.PeerSettings, deviceKeyManager, profileManager);
+            Listener = new NetworkListener(Peer, keyConfig, Config.ListenerAddressFamily);
             Discovery = new NetworkDiscovery(Config, Peer, Listener);
             ProgressTracker = new ProgressTracker(Peer, 500);
 
             // Subscribe to save events
-            Peer.NewPairAdded += (s, e) => Config.Save();
-            Peer.ProfileAdded += (s, e) => Config.Save();
-            Peer.ProfileRemoved += (s, e) => Config.Save();
-            Peer.ProfileChanged += (s, e) => Config.Save();
+            Peer.NewPairAdded += (s, e) => Config.Save(Peer);
+            Peer.Profiles.ProfileAdded += (s, e) => Config.Save(Peer);
+            Peer.Profiles.ProfileRemoved += (s, e) => Config.Save(Peer);
+            Peer.Profiles.ProfileChanged += (s, e) => Task.Run(() => Config.Save(Peer));
 
             // Create a discovery periodic check
             discoveryTimer = new DiscoveryTimer(Discovery);
@@ -84,7 +92,7 @@ namespace Arise.FileSyncer.Service
 
         private static SyncerPeerSettings CreatePeerSettings()
         {
-            return new SyncerPeerSettings(Guid.NewGuid(), $"{Environment.MachineName}:{Environment.UserName}");
+            return new SyncerPeerSettings(Guid.NewGuid(), $"{Environment.MachineName}:{Environment.UserName}", SupportTimestamp);
         }
 
         #region IDisposable Support
@@ -113,6 +121,7 @@ namespace Arise.FileSyncer.Service
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

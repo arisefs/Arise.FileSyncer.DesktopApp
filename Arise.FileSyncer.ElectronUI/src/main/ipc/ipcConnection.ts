@@ -24,7 +24,6 @@ export class IpcConnection {
         this.receiveBuffer = "";
 
         const ipcPathBase = this.getIpcPathBase();
-
         ipc.connectTo("sender", ipcPathBase + "AriseFileSyncerToServicePipe", () => {
             ipc.of.sender.on("connect", () => {
                 this.connectedSender = true;
@@ -34,7 +33,7 @@ export class IpcConnection {
                 this.connectedSender = false;
                 this.onDisconnected();
             });
-            ipc.of.sender.on("data", this.onData.bind(this));
+            //ipc.of.sender.on("data", this.onData.bind(this));
             ipc.of.sender.on("error", this.onError.bind(this));
         });
 

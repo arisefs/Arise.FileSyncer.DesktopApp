@@ -1,0 +1,66 @@
+:root {
+    --main-act-header-height: 64px;
+}
+
+#act-main-app {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+
+    user-select: none;
+    cursor: default;
+    overflow: hidden;
+}
+
+#main-act-header {
+    height: var(--main-act-header-height);
+    background-color: #8eacbb;
+
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+}
+
+#main-act-content {
+    background-color: #FAFAFA;
+    display: flex;
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+#main-act-notification {
+    transition: height 0.3s;
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    overflow: hidden;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.main-act-notification-hide {
+    height: 0px;
+}
+
+.main-act-notification-show {
+    height: 40px;
+}
+
+.main-act-notification-success {
+    background-color: green;
+    color: white;
+}
+
+.main-act-notification-error {
+    background-color: red;
+    color: white;
+}
+
+.base-page {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    padding: 8px;
+}

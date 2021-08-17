@@ -62,7 +62,8 @@ class Application {
             minHeight: 300,
             webPreferences: {
                 nodeIntegration: true,
-                enableRemoteModule: true
+                enableRemoteModule: true,
+                contextIsolation: false,
             }
         });
 

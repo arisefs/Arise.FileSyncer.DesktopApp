@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.IO.Pipes;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Arise.FileSyncer.Common;
@@ -18,44 +19,38 @@ namespace Arise.FileSyncer.Service.Ipc
         public readonly SyncerService Service;
 
         private readonly NamedPipeServerStream ipcReceiver;
-        private readonly NamedPipeServerStream ipcSender;
+        private NamedPipeServerStream ipcSender;
         private volatile bool receiverConnected = false;
         private volatile bool senderConnected = false;
 
         private readonly ConcurrentQueue<IpcMessage> senderQueue;
         private readonly AutoResetEvent sendEvent;
 
-        private readonly System.Timers.Timer updateTimer;
-
-        private readonly object connectLock = new object();
+        private readonly object connectLock = new();
 
         public IpcController(SyncerService service)
         {
             Service = service;
 
-            updateTimer = new System.Timers.Timer(1000.0);
-            updateTimer.Elapsed += UpdateTimer_Elapsed;
-            updateTimer.AutoReset = true;
-
             senderQueue = new ConcurrentQueue<IpcMessage>();
             sendEvent = new AutoResetEvent(false);
 
-            // Dedicated pipes for in and outgoing messages are needed!
-            ipcReceiver = new NamedPipeServerStream("AriseFileSyncerToServicePipe", PipeDirection.InOut);
-            ipcSender = new NamedPipeServerStream("AriseFileSyncerFromServicePipe", PipeDirection.InOut);
+            // Dedicated pipes for in and outgoing messages are needed! To support Node-IPC, InOut mode is needed!
+            ipcReceiver = new NamedPipeServerStream("AriseFileSyncerToServicePipe", PipeDirection.InOut); // In
+            ipcSender = new NamedPipeServerStream("AriseFileSyncerFromServicePipe", PipeDirection.InOut); // Out
 
             Task.Factory.StartNew(Receiver, TaskCreationOptions.LongRunning);
             Task.Factory.StartNew(Sender, TaskCreationOptions.LongRunning);
 
             Service.ProgressTracker.ProgressUpdate += ProgressTracker_ProgressUpdate;
 
-            Service.Peer.ConnectionAdded += (s, e) => Send(new ConnectionAddedMessage().Fill(e));
-            Service.Peer.ConnectionVerified += (s, e) => Send(new ConnectionVerifiedMessage().Fill(e));
-            Service.Peer.ConnectionRemoved += (s, e) => Send(new ConnectionRemovedMessage().Fill(e));
-            Service.Peer.ProfileReceived += (s, e) => Send(new ReceivedProfileMessage().Fill(e));
-            Service.Peer.ProfileAdded += (s, e) => Send(new ProfileAddedMessage().Fill(e));
-            Service.Peer.ProfileChanged += (s, e) => Send(new ProfileChangedMessage().Fill(e));
-            Service.Peer.ProfileRemoved += (s, e) => Send(new ProfileRemovedMessage().Fill(e));
+            Service.Peer.Connections.ConnectionAdded += (s, e) => Send(new ConnectionAddedMessage().Fill(e));
+            Service.Peer.Connections.ConnectionVerified += (s, e) => Send(new ConnectionVerifiedMessage().Fill(e));
+            Service.Peer.Connections.ConnectionRemoved += (s, e) => Send(new ConnectionRemovedMessage().Fill(e));
+            Service.Peer.Profiles.ProfileReceived += (s, e) => Send(new ReceivedProfileMessage().Fill(e));
+            Service.Peer.Profiles.ProfileAdded += (s, e) => Send(new ProfileAddedMessage().Fill(e));
+            Service.Peer.Profiles.ProfileChanged += (s, e) => Send(new ProfileChangedMessage().Fill(e));
+            Service.Peer.Profiles.ProfileRemoved += (s, e) => Send(new ProfileRemovedMessage().Fill(e));
             Service.Peer.PairingRequest += (s, e) =>
             {
                 Log.Info("Auto accepting pair: " + e.DisplayName);
@@ -70,17 +65,6 @@ namespace Arise.FileSyncer.Service.Ipc
                 senderQueue.Enqueue(message);
                 sendEvent.Set();
             }
-        }
-
-        public void StartUpdateTimer()
-        {
-            updateTimer.Start();
-        }
-
-        private void UpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            if (ipcSender.IsConnected) { } //Send(new UpdateMessage().Fill(this));
-            else updateTimer.Stop();
         }
 
         private void ProgressTracker_ProgressUpdate(object sender, ProgressUpdateEventArgs e)
@@ -146,7 +130,13 @@ namespace Arise.FileSyncer.Service.Ipc
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("IPC Error: " + ex.Message);
+                    Log.Error("IPC (S) Error: " + ex.Message);
+
+                    // Fix pipe?
+                    ipcSender.Disconnect();
+                    ipcSender.Dispose();
+                    ipcSender = new NamedPipeServerStream("AriseFileSyncerFromServicePipe", PipeDirection.InOut);
+
                     continue;
                 }
 
@@ -162,12 +152,14 @@ namespace Arise.FileSyncer.Service.Ipc
                     {
                         if (senderQueue.TryDequeue(out IpcMessage message))
                         {
-                            string json = Json.Serialize(message) + "\n";
-                            byte[] binaryJson = Encoding.UTF8.GetBytes(json);
+                            var classType = IpcMessageFactory.GetClassType(message.Command);
+                            byte[] binaryJson = JsonSerializer.SerializeToUtf8Bytes(message, classType);
 
                             try
                             {
                                 ipcSender.Write(binaryJson, 0, binaryJson.Length);
+                                ipcSender.WriteByte(0x0A); // NewLine
+                                ipcSender.Flush();
                             }
                             catch (Exception ex)
                             {
@@ -184,10 +176,7 @@ namespace Arise.FileSyncer.Service.Ipc
                 DisconnectSender();
 
                 // Clear senderQueue
-                while (!senderQueue.IsEmpty)
-                {
-                    while (senderQueue.TryDequeue(out IpcMessage message)) { }
-                }
+                senderQueue.Clear();
             }
         }
 
@@ -201,7 +190,7 @@ namespace Arise.FileSyncer.Service.Ipc
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("IPC Error: " + ex.Message);
+                    Log.Error("IPC (R) Error: " + ex.Message);
                     continue;
                 }
 
@@ -212,7 +201,7 @@ namespace Arise.FileSyncer.Service.Ipc
                 }
 
                 // It can be left without dispose. (?)
-                StreamReader reader = new StreamReader(ipcReceiver);
+                StreamReader reader = new(ipcReceiver);
                 IpcMessage message = null;
 
                 while (ipcReceiver.IsConnected)
@@ -223,8 +212,7 @@ namespace Arise.FileSyncer.Service.Ipc
                         if (!string.IsNullOrEmpty(json))
                         {
                             string command = ReadCommand(json);
-                            message = IpcMessageFactory.Create(command);
-                            Json.FillObject(message, json);
+                            message = IpcMessageFactory.Deserialize(command, json);
                         }
                     }
                     catch (Exception ex)
@@ -239,18 +227,17 @@ namespace Arise.FileSyncer.Service.Ipc
                 }
 
                 reader.DiscardBufferedData();
-                reader = null;
 
                 DisconnectReceiver();
                 DisconnectSender();
             }
         }
 
-        private string ReadCommand(string json)
+        private static string ReadCommand(string json)
         {
             if (json.StartsWith("{\"Command\":", StringComparison.Ordinal))
             {
-                string subJson = json.Substring(12);
+                string subJson = json[12..];
                 int endIndex = subJson.IndexOf('"');
                 return subJson.Substring(0, endIndex);
             }
@@ -273,7 +260,6 @@ namespace Arise.FileSyncer.Service.Ipc
                     ipcReceiver?.Dispose();
                     ipcSender?.Dispose();
                     sendEvent.Dispose();
-                    updateTimer.Dispose();
                 }
 
                 disposedValue = true;

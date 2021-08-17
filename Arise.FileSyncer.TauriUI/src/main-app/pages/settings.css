@@ -1,0 +1,58 @@
+.settings-divider {
+    height: 16px;
+}
+
+.settings-optionsgrid {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    grid-gap: 8px;
+    margin-top: 8px;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+.settings-aboutgrid {
+    display: grid;
+    grid-template-columns: 150px 2fr;
+    grid-gap: 8px;
+    margin-top: 8px;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+.settings-numerical-text {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+}
+
+.settings-numerical-editor {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: row;
+    height: 28px;
+}
+
+.settings-numerical-editor input {
+    border: 1px solid black;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-right-style: none;
+    box-sizing: border-box;
+    display: flex;
+    flex: 1 1 auto;
+    padding-left: 4px;
+    width: 1px;
+}
+
+.settings-numerical-editor button {
+    border: 1px solid black;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 0 auto;
+    padding-left: 16px;
+    padding-right: 16px;
+}

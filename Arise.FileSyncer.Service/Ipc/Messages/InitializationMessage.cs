@@ -18,7 +18,7 @@ namespace Arise.FileSyncer.Service.Ipc.Messages
             DisplayName = ipc.Service.Peer.Settings.DisplayName;
 
             Profiles = new List<ProfileData>();
-            foreach (var kv in ipc.Service.Peer.Settings.Profiles)
+            foreach (var kv in ipc.Service.Peer.Profiles.Snapshot())
             {
                 Profiles.Add(new ProfileData(kv.Key, kv.Value));
             }
@@ -35,11 +35,11 @@ namespace Arise.FileSyncer.Service.Ipc.Messages
 
             public static ConnectionData[] CreateArray(SyncerPeer peer)
             {
-                List<ConnectionData> list = new List<ConnectionData>();
+                List<ConnectionData> list = new();
 
-                foreach (Guid id in peer.GetConnectionIds())
+                foreach (Guid id in peer.Connections.GetConnectionIds())
                 {
-                    if (peer.TryGetConnection(id, out ISyncerConnection connection))
+                    if (peer.Connections.TryGetConnection(id, out ISyncerConnection connection))
                     {
                         list.Add(new ConnectionData()
                         {
