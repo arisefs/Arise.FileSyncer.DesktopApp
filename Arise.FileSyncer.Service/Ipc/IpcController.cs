@@ -153,7 +153,7 @@ namespace Arise.FileSyncer.Service.Ipc
                         if (senderQueue.TryDequeue(out IpcMessage message))
                         {
                             var classType = IpcMessageFactory.GetClassType(message.Command);
-                            byte[] binaryJson = JsonSerializer.SerializeToUtf8Bytes(Convert.ChangeType(message, classType));
+                            byte[] binaryJson = JsonSerializer.SerializeToUtf8Bytes(message, classType);
 
                             try
                             {
