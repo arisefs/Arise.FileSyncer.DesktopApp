@@ -43,14 +43,14 @@ fn main() {
         .expect("error while running tauri application");
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 struct LoadActivity {
     widget_name: String,
     props: ActivityProps,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 struct ActivityProps {
     lost_connection: bool,
