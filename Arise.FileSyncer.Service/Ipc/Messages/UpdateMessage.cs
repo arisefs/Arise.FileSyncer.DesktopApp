@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using Arise.FileSyncer.Common;
-using Arise.FileSyncer.Core;
 
 namespace Arise.FileSyncer.Service.Ipc.Messages
 {

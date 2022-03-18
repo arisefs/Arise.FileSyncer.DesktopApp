@@ -2,12 +2,9 @@ using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.IO.Pipes;
-using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Arise.FileSyncer.Common;
-using Arise.FileSyncer.Core;
 using Arise.FileSyncer.Service.Ipc.Messages;
 
 namespace Arise.FileSyncer.Service.Ipc
@@ -152,8 +149,7 @@ namespace Arise.FileSyncer.Service.Ipc
                     {
                         if (senderQueue.TryDequeue(out IpcMessage message))
                         {
-                            var classType = IpcMessageFactory.GetClassType(message.Command);
-                            byte[] binaryJson = JsonSerializer.SerializeToUtf8Bytes(message, classType);
+                            byte[] binaryJson = IpcMessageFactory.Serialize(message);
 
                             try
                             {

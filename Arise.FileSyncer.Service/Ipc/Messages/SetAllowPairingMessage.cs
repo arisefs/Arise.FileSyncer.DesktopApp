@@ -1,5 +1,3 @@
-using Arise.FileSyncer.Core;
-
 namespace Arise.FileSyncer.Service.Ipc.Messages
 {
     public class SetAllowPairingMessage : IpcMessage
