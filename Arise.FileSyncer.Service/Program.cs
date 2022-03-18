@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 
 namespace Arise.FileSyncer.Service
@@ -10,8 +11,15 @@ namespace Arise.FileSyncer.Service
             Log.Error = (msg) => { Console.WriteLine($"E: {msg}"); };
             Log.Warning = (msg) => { Console.WriteLine($"W: {msg}"); };
             Log.Info = (msg) => { Console.WriteLine($"I: {msg}"); };
-            Log.Verbose = (msg) => { Console.WriteLine($"V: {msg}"); };
+
+#if DEBUG
             Log.Debug = (msg) => { Console.WriteLine($"D: {msg}"); };
+#else
+            Log.Debug = (msg) => { /* ignore */ };
+#endif
+
+            if (args.Contains("-v")) Log.Verbose = (msg) => { Console.WriteLine($"V: {msg}"); };
+            else Log.Verbose = (msg) => { /* ignore */ };
 
             var syncerService = new SyncerService();
 
