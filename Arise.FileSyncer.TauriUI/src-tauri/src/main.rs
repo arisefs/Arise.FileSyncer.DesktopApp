@@ -3,10 +3,12 @@
     windows_subsystem = "windows"
 )]
 
+mod appstate;
 mod ipc;
 mod messages;
 mod models;
 
+use appstate::AppState;
 use ipc::{IpcEvent, IpcService};
 use messages::{
     DeleteProfileMessage, EditProfileMessage, Message, NewProfileMessage,
@@ -14,22 +16,16 @@ use messages::{
 };
 use serde::{Deserialize, Serialize};
 use std::error::Error;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use tauri::Window;
 
-struct MyState {
-    ipc_service: IpcService,
-    is_active: Arc<AtomicBool>,
-}
+static GLOBAL: state::Storage<AppState> = state::Storage::new();
 
 fn main() {
-    let ipc_service = IpcService::new();
+    // Setup global state first
+    GLOBAL.set(AppState::new(IpcService::new()));
 
+    // Start Tauri
     tauri::Builder::default()
-        .manage(MyState {
-            ipc_service,
-            is_active: Arc::new(AtomicBool::new(false)),
-        })
         .invoke_handler(tauri::generate_handler![
             window_ready,
             set_allow_pairing,
@@ -40,7 +36,7 @@ fn main() {
             edit_profile
         ])
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .expect("Error while running tauri application");
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -57,14 +53,16 @@ struct ActivityProps {
 }
 
 #[tauri::command]
-fn window_ready(window: tauri::Window, state: tauri::State<MyState>) {
-    println!("Window JS is ready! Loading activity 'IpcStatusActivity'.");
+async fn window_ready(window: Window) {
+    println!("Webview is ready");
+    println!("Loading activity 'IpcStatusActivity'");
     load_activity(&window, "IpcStatusActivity", false);
 
-    if !state.is_active.load(Ordering::SeqCst) {
-        let is_active_clone = state.is_active.clone();
-        let receiver = state.ipc_service.receiver.clone();
-        let sender = state.ipc_service.sender.clone();
+    let state = GLOBAL.get();
+    if !state.active().get() {
+        let active = state.active().clone();
+        let receiver = state.service().receiver.clone();
+        let sender = state.service().sender.clone();
 
         std::thread::spawn(move || {
             loop {
@@ -86,28 +84,30 @@ fn window_ready(window: tauri::Window, state: tauri::State<MyState>) {
                 }
             }
 
-            is_active_clone.store(false, Ordering::SeqCst);
+            active.set(false);
         });
 
-        state.is_active.store(true, Ordering::SeqCst);
+        state.active().set(true);
     } else {
-        state.ipc_service.sender.send(Message::Welcome).unwrap();
+        state.service().sender.send(Message::Welcome).unwrap();
     }
 }
 
-fn load_activity(window: &tauri::Window, activity: &str, lost_connection: bool) {
+fn load_activity(window: &Window, activity: &str, disconnected: bool) {
     if let Err(error) = window.emit(
         "window-load-activity",
         LoadActivity {
             widget_name: activity.to_string(),
-            props: ActivityProps { lost_connection },
+            props: ActivityProps {
+                lost_connection: disconnected,
+            },
         },
     ) {
         eprintln!("Tauri emit error: {}", error);
     }
 }
 
-fn handle_message(window: &tauri::Window, message: Message) -> Result<(), Box<dyn Error>> {
+fn handle_message(window: &Window, message: Message) -> Result<(), Box<dyn Error>> {
     match message {
         Message::Update(_) => window.emit("srvUpdate", message)?,
         Message::Initialization(_) => window.emit("srvInitialization", message)?,
@@ -127,39 +127,48 @@ fn handle_message(window: &tauri::Window, message: Message) -> Result<(), Box<dy
 }
 
 #[tauri::command]
-fn set_allow_pairing(state: tauri::State<MyState>, new_pairing_state: bool) {
+async fn set_allow_pairing(new_pairing_state: bool) {
     let message = Message::SetAllowPairing(SetAllowPairingMessage {
         allow_pairing: new_pairing_state,
     });
-    state.ipc_service.sender.send(message).unwrap();
+    send_message(message);
 }
 
 #[tauri::command]
-fn profile_new_request(state: tauri::State<MyState>, profile_data: NewProfileMessage) {
+async fn profile_new_request(profile_data: NewProfileMessage) {
     let message = Message::NewProfile(profile_data);
-    state.ipc_service.sender.send(message).unwrap();
+    send_message(message);
 }
 
 #[tauri::command]
-fn accept_profile(state: tauri::State<MyState>, result_data: ReceivedProfileResultMessage) {
+async fn accept_profile(result_data: ReceivedProfileResultMessage) {
     let message = Message::ReceivedProfileResult(result_data);
-    state.ipc_service.sender.send(message).unwrap();
+    send_message(message);
 }
 
 #[tauri::command]
-fn delete_profile(state: tauri::State<MyState>, profile_id: String) {
+async fn delete_profile(profile_id: String) {
     let message = Message::DeleteProfile(DeleteProfileMessage { profile_id });
-    state.ipc_service.sender.send(message).unwrap();
+    send_message(message);
 }
 
 #[tauri::command]
-fn share_profile(state: tauri::State<MyState>, share_data: SendProfileMessage) {
+async fn share_profile(share_data: SendProfileMessage) {
     let message = Message::SendProfile(share_data);
-    state.ipc_service.sender.send(message).unwrap();
+    send_message(message);
 }
 
 #[tauri::command]
-fn edit_profile(state: tauri::State<MyState>, profile_data: EditProfileMessage) {
+async fn edit_profile(profile_data: EditProfileMessage) {
     let message = Message::EditProfile(profile_data);
-    state.ipc_service.sender.send(message).unwrap();
+    send_message(message);
+}
+
+fn send_message(message: Message) {
+    GLOBAL
+        .get()
+        .service()
+        .sender
+        .send(message)
+        .expect("Failed to send the message to the service");
 }

@@ -1,5 +1,6 @@
 import AppData from "./app-data"
-import { listen, Event } from "@tauri-apps/api/event"
+import { Event } from "@tauri-apps/api/event"
+import { appWindow } from "@tauri-apps/api/window"
 import { changePage } from "../main-app/page-controller"
 import { ReceivedProfilePage } from "../main-app/pages/profile/received"
 import {
@@ -16,14 +17,14 @@ import {
 export default async function initUpdater() {
     console.log("Initializing IPC listeners")
 
-    await listen("srvConnectionAdded", onConnectionAdded)
-    await listen("srvConnectionVerified", onConnectionVerified)
-    await listen("srvConnectionRemoved", onConnectionRemoved)
-    await listen("srvUpdate", onUpdate)
-    await listen("srvProfileAdded", onProfileAdded)
-    await listen("srvProfileChanged", onProfileChanged)
-    await listen("srvProfileRemoved", onProfileRemoved)
-    await listen("srvReceivedProfile", onReceivedProfile)
+    await appWindow.listen("srvConnectionAdded", onConnectionAdded)
+    await appWindow.listen("srvConnectionVerified", onConnectionVerified)
+    await appWindow.listen("srvConnectionRemoved", onConnectionRemoved)
+    await appWindow.listen("srvUpdate", onUpdate)
+    await appWindow.listen("srvProfileAdded", onProfileAdded)
+    await appWindow.listen("srvProfileChanged", onProfileChanged)
+    await appWindow.listen("srvProfileRemoved", onProfileRemoved)
+    await appWindow.listen("srvReceivedProfile", onReceivedProfile)
 }
 
 function onConnectionAdded(e: Event<ConnectionAdded.Message>) {
