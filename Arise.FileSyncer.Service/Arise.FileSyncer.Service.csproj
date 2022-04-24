@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Arise.FileSyncer.Common" Version="3.2.1" />
+    <PackageReference Include="Arise.FileSyncer.Common" Version="3.3.0" />
   </ItemGroup>
 
 </Project>
