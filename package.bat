@@ -9,7 +9,7 @@ mkdir %diroutput%
 
 :: Run the 2 projects packagers
 cd Arise.FileSyncer.ElectronUI
-call node build.mjs
+call nu build.nu
 cd ../Arise.FileSyncer.Service
 call package.bat
 cd ..
