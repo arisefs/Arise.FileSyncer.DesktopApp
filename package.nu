@@ -16,7 +16,7 @@ for pr in $projects {
     cd $pr.name
     ^nu 'build.nu'; check
     cd $pr.pkgs
-    ls | each { |i| compress $i.name $'($out)/($pr.type)-($i.name)' }
+    ls | each { |i| compress $'($pr.type)-($i.name)' $i.name }
     ignore
 }
 
@@ -27,7 +27,7 @@ def step [text] {
     echo [(ansi purple) $text (ansi reset)] | str collect
 }
 
-def compress [dir, target] {
-    ^pwsh -nop -c $'Compress-Archive -Path ($dir)/* -DestinationPath ($target) -CompressionLevel Optimal'
-    check
+def compress [name, dir] {
+    if ((which '7z' | length) == 0) { alias 7z = ^7zz } else { alias 7z = ^7z }
+    cd $dir; 7z a $'($out)/($name).zip' *; check
 }
