@@ -28,6 +28,12 @@ def step [text] {
 }
 
 def compress [name, dir] {
-    if ((which '7z' | length) == 0) { alias 7z = ^7zz } else { alias 7z = ^7z }
-    cd $dir; 7z a $'($out)/($name).zip' *; check
+    let archive = $'($out)/($name).zip'
+    cd $dir
+    if ((which '7z' | length) == 0) {
+        ^7zz a $archive *
+    } else {
+        ^7z a $archive *
+    }
+    check
 }
