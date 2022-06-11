@@ -3,6 +3,7 @@ import React from "react"
 import "./checkbox.css"
 
 interface CheckBoxProps {
+    children?: React.ReactNode,
     name: string,
     checked?: boolean,
     disabled?: boolean,

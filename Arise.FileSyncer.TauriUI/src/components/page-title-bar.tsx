@@ -3,6 +3,7 @@ import React from "react"
 import "./page-title-bar.css"
 
 interface PageTitleBarProps {
+    children?: React.ReactNode,
     useMini: boolean,
     title: string,
 }

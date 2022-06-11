@@ -3,6 +3,7 @@ import React from "react"
 import "./button.css"
 
 interface ButtonProps {
+    children?: React.ReactNode,
     style: string,
     onClick: (event: React.MouseEvent<HTMLDivElement>) => void,
     disabled?: boolean,
