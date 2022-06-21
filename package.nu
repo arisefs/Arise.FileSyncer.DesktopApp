@@ -30,10 +30,11 @@ def step [text] {
 def compress [name, dir] {
     let archive = $'($out)/($name).zip'
     cd $dir
-    if ((which '7z' | length) == 0) {
-        ^7zz a $archive *
-    } else {
+    # Use 7zz if available (the official up-to-date version of 7zip on Linux)
+    if ((which '7zz' | length) == 0) {
         ^7z a $archive *
+    } else {
+        ^7zz a $archive *
     }
     check
 }
