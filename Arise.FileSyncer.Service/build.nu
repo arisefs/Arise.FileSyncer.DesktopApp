@@ -1,7 +1,7 @@
-alias check = if $env.LAST_EXIT_CODE != 0 { exit 1 }
+alias step = cprint cyan
 
 if not ('Arise.FileSyncer.Service.csproj' | path exists) {
-    echo [(ansi red) 'Incorrect working directory' (ansi reset)] | str collect
+    cprint red 'Incorrect working directory'
     exit 1
 }
 
@@ -18,11 +18,10 @@ for platform in $platforms {
 step 'Done!'
 
 
-def step [text] {
-    echo [(ansi cyan) $text (ansi reset)] | str collect
+def cprint [color text] {
+    echo [(ansi $color) $text (ansi reset)] | str collect
 }
 
 def build [rt] {
     ^dotnet publish -c Release -o $'bin/Publish/($rt)' -r $rt --sc
-    check
 }

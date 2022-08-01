@@ -1,4 +1,4 @@
-alias check = if $env.LAST_EXIT_CODE != 0 { exit 1 }
+alias step = cprint purple
 
 let projects = [
     [name pkgs type]; 
@@ -14,7 +14,7 @@ rm -prf $out; mkdir $out
 for pr in $projects {
     step $'Packaging ($pr.name)'
     cd $pr.name
-    ^nu 'build.nu'; check
+    ^nu 'build.nu'
     cd $pr.pkgs
     ls | each { |i| compress $'($pr.type)-($i.name)' $i.name }
     ignore
@@ -23,8 +23,8 @@ for pr in $projects {
 step 'Success!'
 
 
-def step [text] {
-    echo [(ansi purple) $text (ansi reset)] | str collect
+def cprint [color text] {
+    echo [(ansi $color) $text (ansi reset)] | str collect
 }
 
 def compress [name, dir] {
@@ -36,5 +36,4 @@ def compress [name, dir] {
     } else {
         ^7zz a $archive *
     }
-    check
 }
