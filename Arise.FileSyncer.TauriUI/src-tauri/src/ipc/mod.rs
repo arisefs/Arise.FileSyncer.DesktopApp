@@ -1,5 +1,6 @@
 mod receiver;
 mod sender;
+mod comms;
 
 use crate::messages::Message;
 use channel::{Receiver, Sender};
