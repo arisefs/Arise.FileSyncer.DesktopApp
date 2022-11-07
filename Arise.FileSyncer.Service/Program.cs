@@ -8,18 +8,7 @@ namespace Arise.FileSyncer.Service
     {
         static void Main(string[] args)
         {
-            Log.Error = (msg) => { Console.WriteLine($"E: {msg}"); };
-            Log.Warning = (msg) => { Console.WriteLine($"W: {msg}"); };
-            Log.Info = (msg) => { Console.WriteLine($"I: {msg}"); };
-
-#if DEBUG
-            Log.Debug = (msg) => { Console.WriteLine($"D: {msg}"); };
-#else
-            Log.Debug = (msg) => { /* ignore */ };
-#endif
-
-            if (args.Contains("-v")) Log.Verbose = (msg) => { Console.WriteLine($"V: {msg}"); };
-            else Log.Verbose = (msg) => { /* ignore */ };
+            Log.SetLogger(new DesktopLogger(args.Contains("-v")));
 
             var syncerService = new SyncerService();
 
@@ -29,7 +18,7 @@ namespace Arise.FileSyncer.Service
             }
             catch (Exception ex)
             {
-                Log.Error(ex.Message);
+                Log.Error($"Fatal error: {ex.Message}");
 #if DEBUG
                 throw;
 #else

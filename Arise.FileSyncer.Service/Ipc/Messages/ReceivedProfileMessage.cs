@@ -17,11 +17,11 @@ namespace Arise.FileSyncer.Service.Ipc.Messages
         internal IpcMessage Fill(ProfileReceivedEventArgs e)
         {
             ConnectionId = e.RemoteId;
-            Id = e.Id.ToString();
-            Key = e.Key;
-            Name = e.Name;
-            CreationDate = e.CreationDate;
-            SkipHidden = e.SkipHidden;
+            Id = e.ProfileShare.Id.ToString();
+            Key = e.ProfileShare.Key;
+            Name = e.ProfileShare.Name;
+            CreationDate = e.ProfileShare.CreationDate;
+            SkipHidden = e.ProfileShare.SkipHidden;
             return this;
         }
     }

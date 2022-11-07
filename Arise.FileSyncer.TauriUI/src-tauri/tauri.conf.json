@@ -1,20 +1,26 @@
 {
-  "$schema": "..\\node_modules/@tauri-apps/cli\\schema.json",
-  "package": {
-    "productName": "arise-filesyncer-manager",
-    "version": "0.1.0"
-  },
   "build": {
-    "distDir": "../dist",
-    "devPath": "http://localhost:3000",
     "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build"
+    "beforeBuildCommand": "npm run build",
+    "devPath": "http://localhost:1420",
+    "distDir": "../dist"
+  },
+  "package": {
+    "productName": "tauri-dummy-app",
+    "version": "0.0.0"
   },
   "tauri": {
+    "allowlist": {
+      "all": true
+    },
     "bundle": {
       "active": false,
-      "targets": "all",
-      "identifier": "com.icsanyi96.arisefilesyncer",
+      "category": "DeveloperTool",
+      "copyright": "",
+      "deb": {
+        "depends": []
+      },
+      "externalBin": [],
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -22,46 +28,38 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "resources": [],
-      "externalBin": [],
-      "copyright": "",
-      "category": "DeveloperTool",
-      "shortDescription": "",
+      "identifier": "com.icsanyi96.arisefilesyncer",
       "longDescription": "",
-      "deb": {
-        "depends": []
-      },
       "macOS": {
-        "frameworks": [],
-        "minimumSystemVersion": "",
+        "entitlements": null,
         "exceptionDomain": "",
-        "signingIdentity": null,
+        "frameworks": [],
         "providerShortName": null,
-        "entitlements": null
+        "signingIdentity": null
       },
+      "resources": [],
+      "shortDescription": "",
+      "targets": "all",
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
         "timestampUrl": ""
       }
     },
+    "security": {
+      "csp": null
+    },
     "updater": {
       "active": false
     },
-    "allowlist": {
-      "all": true
-    },
     "windows": [
       {
-        "title": "Arise File Syncer Manager",
+        "title": "tauri-dummy-app",
         "width": 800,
         "height": 600,
         "resizable": true,
         "fullscreen": false
       }
-    ],
-    "security": {
-      "csp": null
-    }
+    ]
   }
 }
