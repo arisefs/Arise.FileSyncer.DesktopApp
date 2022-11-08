@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <AssemblyName>arise-filesyncer-service</AssemblyName>
     <IsTrimmable>true</IsTrimmable>
@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <PublishAot>true</PublishAot>
     <PublishTrimmed>true</PublishTrimmed>
     <PublishReadyToRun>true</PublishReadyToRun>
     <PublishSingleFile>true</PublishSingleFile>
@@ -19,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Arise.FileSyncer.Common" Version="3.5.0" />
+    <PackageReference Include="Arise.FileSyncer.Common" Version="3.6.0" />
   </ItemGroup>
 
 </Project>

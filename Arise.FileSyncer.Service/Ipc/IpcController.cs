@@ -235,7 +235,7 @@ namespace Arise.FileSyncer.Service.Ipc
             {
                 string subJson = json[12..];
                 int endIndex = subJson.IndexOf('"');
-                return subJson.Substring(0, endIndex);
+                return subJson[..endIndex];
             }
             else
             {
