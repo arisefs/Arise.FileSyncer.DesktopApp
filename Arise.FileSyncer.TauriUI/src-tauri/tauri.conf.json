@@ -6,8 +6,8 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "tauri-dummy-app",
-    "version": "0.0.0"
+    "productName": "arise-filesyncer-manager",
+    "version": "3.0.0"
   },
   "tauri": {
     "allowlist": {
@@ -28,7 +28,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.icsanyi96.arisefilesyncer",
+      "identifier": "com.icsanyi96.arisefilesyncer.manager",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -54,7 +54,7 @@
     },
     "windows": [
       {
-        "title": "tauri-dummy-app",
+        "title": "Arise File Syncer Manager",
         "width": 800,
         "height": 600,
         "resizable": true,

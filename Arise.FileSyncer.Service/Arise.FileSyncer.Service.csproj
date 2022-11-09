@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <RuntimeIdentifiers>win10-x64;linux-x64</RuntimeIdentifiers>
     <PublishTrimmed>true</PublishTrimmed>
     <PublishRelease>true</PublishRelease>
     <PublishAot>true</PublishAot>
